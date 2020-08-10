@@ -8,6 +8,10 @@
         android:label="flutter_live"
         tools:replace="android:name,android:label">
 
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
         <activity
             android:name=".BJYVideoPlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
