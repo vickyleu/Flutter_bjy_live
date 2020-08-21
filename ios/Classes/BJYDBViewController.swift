@@ -6,8 +6,8 @@
 //
 
 import Foundation
-
-
+import BJLiveUI
+import BJPlaybackUI
 
 
 class BJYDBViewController: UIViewController{
@@ -68,7 +68,7 @@ class BJYDBViewController: UIViewController{
     
          
         self.view.addSubview(bjpvc!.view)
-        
+    
         let uilabel = bjpvc?.topBarView.viewWithTag(111) as? UILabel
         uilabel?.text = bjtitle
     

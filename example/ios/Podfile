@@ -34,7 +34,25 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+
+   # 用于动态引入 Framework，避免冲突问题
+    script_phase \
+    :name => '[BJVideoPlayerCore] Embed Frameworks',
+    :script => 'Pods/BJVideoPlayerCore/frameworks/EmbedFrameworks.sh', # for remote BJVideoPlayerBase
+    :execution_position => :after_compile
+    # 点播回放包括直播 SDK 需要加上
+    script_phase \
+    :name => '[BJLiveCore] Embed Frameworks',
+    :script => 'Pods/BJLiveCore/frameworks/EmbedFrameworks.sh',
+    :execution_position => :after_compile
+    # 用于清理动态引入的 Framework 用不到的架构，避免发布 AppStore 时发生错误，需要写在动态引入 Framework 的 script 之后
+    script_phase \
+    :name => '[BJLiveBase] Clear Archs From Frameworks',
+    :script => 'Pods/BJLiveBase/script/ClearArchsFromFrameworks.sh "BJHLMediaPlayer.framework" "BJYIJKMediaFramework.framework"',
+    :execution_position => :after_compile
 end
 
 post_install do |installer|

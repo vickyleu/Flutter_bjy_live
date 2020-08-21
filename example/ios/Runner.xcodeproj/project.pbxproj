@@ -154,6 +154,9 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				799C968ECB73FD9CF1C8E612 /* [CP] Embed Pods Frameworks */,
 				1A3DB20D4EAF5C487C7776C2 /* [CP] Copy Pods Resources */,
+				8F5A8397747179AFEB06F081 /* [CP-User] [BJVideoPlayerCore] Embed Frameworks */,
+				D8D8C00CC6937966B2E59056 /* [CP-User] [BJLiveCore] Embed Frameworks */,
+				1D0C687FD7CC20373591CD36 /* [CP-User] [BJLiveBase] Clear Archs From Frameworks */,
 			);
 			buildRules = (
 			);
@@ -243,6 +246,16 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		1D0C687FD7CC20373591CD36 /* [CP-User] [BJLiveBase] Clear Archs From Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] [BJLiveBase] Clear Archs From Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "Pods/BJLiveBase/script/ClearArchsFromFrameworks.sh \"BJHLMediaPlayer.framework\" \"BJYIJKMediaFramework.framework\"";
+		};
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -283,6 +296,16 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		8F5A8397747179AFEB06F081 /* [CP-User] [BJVideoPlayerCore] Embed Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] [BJVideoPlayerCore] Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = Pods/BJVideoPlayerCore/frameworks/EmbedFrameworks.sh;
+		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,6 +341,16 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		D8D8C00CC6937966B2E59056 /* [CP-User] [BJLiveCore] Embed Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] [BJLiveCore] Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = Pods/BJLiveCore/frameworks/EmbedFrameworks.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 

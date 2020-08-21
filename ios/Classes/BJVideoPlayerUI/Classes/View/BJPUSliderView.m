@@ -137,7 +137,7 @@ typedef NS_ENUM(NSInteger, BJVSliderType) {
     }];
     
     UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-    [MBProgressHUD hideHUDForView:keyWindow animated:YES];
+    [BJLMBProgressHUD hideHUDForView:keyWindow animated:YES];
 }
 
 #pragma mark touch private

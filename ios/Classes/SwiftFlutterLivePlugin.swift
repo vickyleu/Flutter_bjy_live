@@ -82,7 +82,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin ,BJVRequestTokenDel
         let bjuser = BJLUser.init(number: num, name: name, groupID: 0, avatar: avatar, role: BJLUserRole.student)
         
         
-        let bjlrc = BJLRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLRoomViewController
+        let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
         
     
         
