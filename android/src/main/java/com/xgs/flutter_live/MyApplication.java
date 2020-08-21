@@ -1,8 +1,6 @@
 package com.xgs.flutter_live;
 
-
 import android.app.Application;
-
 import com.baijiayun.BJYPlayerSDK;
 
 public class MyApplication extends Application {

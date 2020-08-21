@@ -3,7 +3,8 @@
 .idea
 .packages
 .pub/
-
+**Podfile.lock
+**.last_build_id
 build/
 **pubspec.lock
 **.flutter-plugins-dependencies**

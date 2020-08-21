@@ -13,7 +13,7 @@ A new Flutter plugin.
   s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
-  s.source           = { :path => '.' }
+  s.source           = { :path => '.'}
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
 
@@ -22,9 +22,38 @@ A new Flutter plugin.
   s.static_framework = true
   s.resources = 'Classes/resource.bundle'
   s.dependency 'Flutter'
-  s.dependency 'BJLiveUI', '~> 2.2.0'
-  s.dependency 'BJPlaybackUI', '~> 2.2.0'
-  #s.dependency 'BJVideoPlayerUI/static.source','~> 2.2.0'
+
+
+  s.dependency 'BJLiveUI'
+  s.dependency 'BJPlaybackUI'
+
+  # dev
+  s.dependency  'BJLiveCore', '~>2.9.0'
+  s.dependency  'BJLiveUI',  '~>2.9.0'
+
+  s.dependency  'BJVideoPlayerCore',  '~>2.9.0'
+  #s.dependency  'BJVideoPlayerUI',  '~>2.9.0'
+  s.dependency  'BJPlaybackUI',  '~>2.9.0'
+
+    # 用于动态引入 Framework，避免冲突问题
+   s.script_phase = { :name => '[BJLiveCore] Embed Frameworks',\
+      :script => '${PODS_ROOT}/BJLiveCore/frameworks/EmbedFrameworks.sh',
+      :execution_position => :after_compile}
+
+
+
+  # 点播回放包括直播 SDK 需要加上
+   s.script_phase = { :name => '[BJLiveCore] Embed Frameworks',\
+    :script => '${PODS_ROOT}/BJLiveCore/frameworks/EmbedFrameworks.sh',
+    :execution_position => :after_compile}
+
+
+  # 用于清理动态引入的 Framework 用不到的架构，避免发布 AppStore 时发生错误，需要写在动态引入 Framework 的 script 之后
+  s.script_phase = { :name => '[BJLiveBase] Clear Archs From Frameworks',\
+  :script => '${PODS_ROOT}/BJLiveBase/script/ClearArchsFromFrameworks.sh "BJHLMediaPlayer.framework" "BJYIJKMediaFramework.framework"',
+  :execution_position => :after_compile}
+
+
 
   s.ios.deployment_target = '9.0'
 

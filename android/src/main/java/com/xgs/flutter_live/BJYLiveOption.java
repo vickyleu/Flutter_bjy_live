@@ -1,7 +1,5 @@
 package com.xgs.flutter_live;
 
-import android.os.Bundle;
-
 import javax.annotation.Nonnull;
 
 import io.flutter.plugin.common.MethodCall;
