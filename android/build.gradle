@@ -1,7 +1,31 @@
 group 'com.xgs.flutter_live'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
 
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.1'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url 'https://raw.github.com/baijia/maven/master/' }
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -25,25 +49,6 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-
-buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven { url 'https://raw.github.com/baijia/maven/master/' }
-    }
-}
 
 
 
@@ -70,7 +75,7 @@ android {
 
 dependencies {
     implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.2.3'
-    implementation 'com.baijia.player:VideoplayerUI:2.1.1'
+    implementation 'com.baijia.player:VideoplayerUI:2.0.1.1'
 }
 
 

@@ -51,6 +51,19 @@ class FlutterLive {
     });
   }
 
+
+  // 跳转在线点播
+  Future<double> addingDownloadQueue(String userName, String userId,
+      String token, String videoId, String title,String extraInfo) async {
+    final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
+      'videoId': videoId,
+      'token': token,
+      'userId': userId,
+      'extraInfo': extraInfo,
+    });
+    return 0;
+  }
+
   // 跳转在线点播
   Future<double> startVideoActivity(String userName, String userId,
       String token, String videoId, String title) async {
