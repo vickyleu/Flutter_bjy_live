@@ -106,6 +106,10 @@ class FlutterLive {
     });
     return map["data"] as List;
   }
+ ///查询下载队列任务
+  Future notifyChange(MethodCall call) async {
+    final dynamic map = await call.arguments;
+  }
 
   ///删除下载队列任务
   void removeDownloadQueue(String userId, String identifier) async {
