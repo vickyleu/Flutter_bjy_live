@@ -76,7 +76,7 @@ class FlutterLive {
 
   // 添加下载任务队列
   Future<Map> addingDownloadQueue(
-      String classID, String sessionID, String userId,String token) async {
+      String classID, String sessionID, String userId, String token) async {
     // if ("addingDownloadQueue".equals(call.method)) {
     //   String classID = call.argument("classID");
     //   String userId = call.argument("userId");
