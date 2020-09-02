@@ -83,10 +83,17 @@ public class BJYController {
     }
 
     // 开启下载
-    static void addingDownloadQueue(final Activity activity, BJYVideoOption videoOption) {
-        Intent intent = new Intent(activity, BJYVideoPlayerActivity.class);
-        intent.putExtras(videoOption.bundle());
-        activity.startActivity(intent);
+    static void addingDownloadQueue(final Activity activity, @Nonnull MethodCall call,MethodChannel channel) {
+
+    }
+    static void pauseDownloadQueue(final Activity activity, @Nonnull MethodCall call,MethodChannel channel) {
+
+    }
+    static void queryDownloadQueue(final Activity activity, @Nonnull MethodCall call,MethodChannel channel) {
+
+    }
+    static void removeDownloadQueue(final Activity activity, @Nonnull MethodCall call,MethodChannel channel) {
+
     }
 
     // 进度回调

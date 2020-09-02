@@ -38,17 +38,19 @@ public class FlutterLivePlugin implements MethodCallHandler, BJYController.Video
         if (call.method.equals("startLive")) {
             BJYController.startLiveActivity(registrar.activity(), new BJYLiveOption().create(call));
             return;
-        }
-        if (call.method.equals("startBack")) {
+        }else if (call.method.equals("startBack")) {
             BJYController.startBJYPlayBack(registrar.activity(), new BJYBackOption().create(call));
             return;
-        }
-        if (call.method.equals("startVideo")) {
+        }else if (call.method.equals("startVideo")) {
             BJYController.startBJYPVideo(registrar.activity(), new BJYVideoOption().create(call));
-        }
-
-        if (call.method.equals("addingDownloadQueue")) {
-            BJYController.addingDownloadQueue(registrar.activity(), new BJYVideoOption().create(call));
+        }else if (call.method.equals("addingDownloadQueue")) {
+            BJYController.addingDownloadQueue(registrar.activity(), call,methodChannel);
+        }else if (call.method.equals("pauseDownloadQueue")) {
+            BJYController.pauseDownloadQueue(registrar.activity(), call,methodChannel);
+        }else if (call.method.equals("queryDownloadQueue")) {
+            BJYController.queryDownloadQueue(registrar.activity(), call,methodChannel);
+        }else if (call.method.equals("removeDownloadQueue")) {
+            BJYController.removeDownloadQueue(registrar.activity(), call,methodChannel);
         }
     }
 

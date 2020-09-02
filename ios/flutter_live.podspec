@@ -33,7 +33,7 @@ A new Flutter plugin.
   s.dependency 'BJVideoPlayerCore'
 
   s.dependency "BJLiveBase"
-
+  s.dependency 'BJPlayerManagerCore'
 
 #   # 用于动态引入 Framework，避免冲突问题
 #   s.script_phase = { :name => '[BJLiveCore] Embed Frameworks',\
