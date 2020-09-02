@@ -3,16 +3,17 @@ import UIKit
 
 import BJLiveUI
 import BJPlaybackUI
-
+import BJVideoPlayerCore
 
 public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin ,BJVRequestTokenDelegate{
-    
-    
-    
+    let downloadManager:BJVDownloadManager;
+// 重写父类的构造函数
+    override init() {
+        super.init()
+        downloadManager=BJVDownloadManager;
+    }
 
-    
-    
-  public static func register(with registrar: FlutterPluginRegistrar) {
+    public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_live", binaryMessenger: registrar.messenger())
     let instance = SwiftFlutterLivePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
@@ -72,6 +73,22 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin ,BJVRequestTokenDel
     }
     
     
+    if(call.method == "addingDownloadQueue"){
+        
+        let dic =  call.arguments as! Dictionary<String,Any>
+        
+        //开启点播
+        let videoId = dic["videoId"] as! String
+        let token = dic["token"] as! String
+        let userName = dic["userName"] as! String
+        let userId = dic["userId"] as! String
+        let title = dic["title"] as! String
+       
+        
+        addingDownloadQueue(videoId: videoId, token: token, userName: userName,userId:userId,title:title,result: result)
+        
+        
+    }
     
   }
     
@@ -142,6 +159,14 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin ,BJVRequestTokenDel
            
        }
     
+    
+    
+    
+    public func addingDownloadQueue(videoId:String,token:String , userName:String,userId:String,title:String,result: @escaping FlutterResult){
+           
+        
+           
+    }
     
     
     

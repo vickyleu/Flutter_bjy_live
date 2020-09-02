@@ -82,6 +82,13 @@ public class BJYController {
         activity.startActivity(intent);
     }
 
+    // 开启下载
+    static void addingDownloadQueue(final Activity activity, BJYVideoOption videoOption) {
+        Intent intent = new Intent(activity, BJYVideoPlayerActivity.class);
+        intent.putExtras(videoOption.bundle());
+        activity.startActivity(intent);
+    }
+
     // 进度回调
     static void onPlayRateOfProgress(int currentTime, int duration) {
         if (videoProgressListener != null) {

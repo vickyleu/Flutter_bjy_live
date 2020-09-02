@@ -53,15 +53,16 @@ class FlutterLive {
 
 
   // 跳转在线点播
-  Future<double> addingDownloadQueue(String userName, String userId,
-      String token, String videoId, String title,String extraInfo) async {
+  Future<bool> addingDownloadQueue(String userName, String userId,
+      String token, String videoId, String title) async {
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
+      'userName': userName,
+      'userId': userId,
       'videoId': videoId,
       'token': token,
-      'userId': userId,
-      'extraInfo': extraInfo,
+      'title': title,
     });
-    return 0;
+    return false;
   }
 
   // 跳转在线点播

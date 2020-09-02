@@ -48,7 +48,7 @@ public class FlutterLivePlugin implements MethodCallHandler, BJYController.Video
         }
 
         if (call.method.equals("addingDownloadQueue")) {
-            BJYController.startBJYPVideo(registrar.activity(), new BJYVideoOption().create(call));
+            BJYController.addingDownloadQueue(registrar.activity(), new BJYVideoOption().create(call));
         }
     }
 
