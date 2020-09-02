@@ -102,26 +102,63 @@ public class BJYController {
     }
 
     // 开启下载
-    static void addingDownloadQueue(Context context, MethodChannel channel,MethodChannel.Result result,DownloadManager downloadManager, String roomId, String sessionID, String userId) {
-        downloadManager.newPlaybackDownloadTask(userId+sessionID, Long.parseLong(roomId), 0, "0", "回放下载")
+    static void addingDownloadQueue(Context context, MethodChannel channel,MethodChannel.Result result,DownloadManager downloadManager,
+                                    String roomId, String userId) {
+        downloadManager.newPlaybackDownloadTask(userId+0, Long.parseLong(roomId), 0, "0", "回放下载")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
                     downloadTask.setDownloadListener(new DownloadListener() {
                         @Override
-                        public void onStarted(DownloadTask p0) {
+                        public void onStarted(DownloadTask task) {
                             Log.e("视频下载","视频下载onStarted ====================");
-                            double readLength = p0.getDownloadedLength();
-                            double countLength = p0.getTotalLength();
-                            String signalFilePath = p0.getSignalFilePath();
+                            double size = task.getTotalLength();
+                            float progress = 0;
+                            String finaName = task.getSignalFileName();
+                            String coverImageUrl= "";
+                            DownloadModel info = task.getSignalDownloadInfo();
+                            String itemIdentifier = info.roomId+"";
+                            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+
+                            Map<String,Object> dict=new HashMap<>();
+                            dict.put("code",1);
+                            dict.put("msg","开始下载");
+                            dict.put("speed","0K");
+                            dict.put("progress",progress);
+                            dict.put("size",size);
+                            dict.put("state",0);
+
+                            dict.put("itemIdentifier",itemIdentifier);
+                            dict.put("finaName",finaName);
+                            dict.put("coverImageUrl",coverImageUrl);
+                            result.success(dict);
                         }
 
                         @Override
-                        public void onPaused(DownloadTask p0) {
+                        public void onPaused(DownloadTask task) {
                             Log.e("视频下载","视频下载onPaused ====================");
-                            double readLength = p0.getDownloadedLength();
-                            double countLength = p0.getTotalLength();
-                            String signalFilePath = p0.getSignalFilePath();
+                            double progress = task.getDownloadedLength();
+                            double size = task.getTotalLength();
+                            String signalFilePath = task.getSignalFilePath();
+                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            long speed = task.getSpeed();
+                            String finaName = task.getSignalFileName();
+                            String coverImageUrl= "";
+                            DownloadModel info = task.getSignalDownloadInfo();
+                            String itemIdentifier = info.roomId+"";
+                            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+                            int state =2;
+                            Map<String,Object> dict=new HashMap<>();
+                            dict.put("progress",progress);
+                            dict.put("size",size);
+                            dict.put("state",state);
+                            dict.put("speed","0K");
+
+                            dict.put("itemIdentifier",itemIdentifier);
+                            dict.put("finaName",finaName);
+                            dict.put("coverImageUrl",coverImageUrl);
+
+                            channel.invokeMethod("notifyChange",  dict);
                         }
 
                         @Override
@@ -131,65 +168,160 @@ public class BJYController {
                         }
 
                         @Override
-                        public void onError(DownloadTask p0, HttpException p1) {
+                        public void onError(DownloadTask task, HttpException p1) {
                             Log.e("视频下载","视频下载onError ====================");
-                            double readLength = p0.getDownloadedLength();
-                            double countLength = p0.getTotalLength();
-                            String signalFilePath = p0.getSignalFilePath();
+
+                            Map<String,Object> dict1=new HashMap<>();
+                            dict1.put("code",0);
+                            dict1.put("msg","下载失败");
+                            try {
+                                result.success(dict1);
+                            }catch (Exception ignored){}
+                            double progress = task.getDownloadedLength();
+                            double size = task.getTotalLength();
+                            String signalFilePath = task.getSignalFilePath();
+                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            long speed = task.getSpeed();
+                            String finaName = task.getSignalFileName();
+                            String coverImageUrl= "";
+                            DownloadModel info = task.getSignalDownloadInfo();
+                            String itemIdentifier = info.roomId+"";
+                            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+                            int state =3;
+                            Map<String,Object> dict=new HashMap<>();
+                            dict.put("progress",progress);
+                            dict.put("size",size);
+                            dict.put("state",state);
+                            dict.put("speed","0K");
+
+                            dict.put("itemIdentifier",itemIdentifier);
+                            dict.put("finaName",finaName);
+                            dict.put("coverImageUrl",coverImageUrl);
+
+                            channel.invokeMethod("notifyChange",  dict);
                         }
 
                         @Override
-                        public void onFinish(DownloadTask p0) {
-                            Log.e("视频下载","视频下载onFinish ===========videoFilePath："+p0.getVideoFilePath());
-                            double readLength = p0.getDownloadedLength();
-                            double countLength = p0.getTotalLength();
-                            String signalFilePath = p0.getSignalFilePath();
+                        public void onFinish(DownloadTask task) {
+                            Log.e("视频下载","视频下载onFinish ===========videoFilePath："+task.getVideoFilePath());
+                            double progress = task.getDownloadedLength();
+                            double size = task.getTotalLength();
+                            String signalFilePath = task.getSignalFilePath();
+                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            long speed = task.getSpeed();
+                            String finaName = task.getSignalFileName();
+                            String coverImageUrl= "";
+                            DownloadModel info = task.getSignalDownloadInfo();
+                            String itemIdentifier = info.roomId+"";
+                            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+                            int state =1;
+                            Map<String,Object> dict=new HashMap<>();
+                            dict.put("progress",progress);
+                            dict.put("size",size);
+                            dict.put("state",state);
+                            dict.put("speed","0K");
 
+                            dict.put("itemIdentifier",itemIdentifier);
+                            dict.put("finaName",finaName);
+                            dict.put("coverImageUrl",coverImageUrl);
+
+                            channel.invokeMethod("notifyChange",  dict);
                         }
 
                         @Override
                         public void onProgress(DownloadTask task) {
-                            double readLength = task.getDownloadedLength();
-                            double countLength = task.getTotalLength();
+                            double progress = task.getDownloadedLength();
+                            double size = task.getTotalLength();
                             String signalFilePath = task.getSignalFilePath();
-                            int progress = (int) (readLength * 100 / countLength);
-                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+progress+" %");
-                            double speed = task.getSpeed();
+                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            long speed = task.getSpeed();
+                            String finaName = task.getSignalFileName();
+                            String coverImageUrl= "";
+                            DownloadModel info = task.getSignalDownloadInfo();
+                            String itemIdentifier = info.roomId+"";
+                            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+                            int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
+                                    ((info.status== TaskStatus.Pause) ? 2 : 0));
+                            Map<String,Object> dict=new HashMap<>();
+                            dict.put("progress",progress);
+                            dict.put("size",size);
+                            dict.put("state",state);
+                            dict.put("speed",getFileSizeString(speed));
 
+                            dict.put("itemIdentifier",itemIdentifier);
+                            dict.put("finaName",finaName);
+                            dict.put("coverImageUrl",coverImageUrl);
+
+                            channel.invokeMethod("notifyChange",  dict);
                         }
                     });
                     downloadTask.start();
-                }, throwable -> throwable.printStackTrace()).toString();
+                }, throwable -> {
+                    throwable.printStackTrace();
+
+                    Map<String,Object> dict1=new HashMap<>();
+                    dict1.put("code",0);
+                    dict1.put("msg","下载失败");
+                    try {
+                        result.success(dict1);
+                    }catch (Exception ignored){}
+                    double progress = 0;
+                    double size = 0;
+                    long speed = 0;
+                    String finaName = null;
+                    String coverImageUrl= "";
+                    String itemIdentifier = roomId;
+                    ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+                    int state =3;
+                    Map<String,Object> dict=new HashMap<>();
+                    dict.put("progress",progress);
+                    dict.put("size",size);
+                    dict.put("state",state);
+                    dict.put("speed","0K");
+
+                    dict.put("itemIdentifier",itemIdentifier);
+                    dict.put("finaName",finaName);
+                    dict.put("coverImageUrl",coverImageUrl);
+
+                    channel.invokeMethod("notifyChange",  dict);
+                }).toString();
     }
 
-    static String getFileSizeString(float size) {
-        if(size >= 1024*1024)//大于1M，则转化成M单位的字符串
+    static String getFileSizeString(long size) {
+        if(size >= 1024*1024.0)//大于1M，则转化成M单位的字符串
         {
-            return String.format(Locale.CHINA,"%1.2fM",size / 1024 / 1024);
+            return String.format(Locale.CHINA,"%1.2fM",(size / 1024.0 / 1024.0));
         }
-        else if(size >= 1024 && size<1024*1024) //不到1M,但是超过了1KB，则转化成KB单位
+        else if(size >= 1024.0 && size<1024.0*1024.0) //不到1M,但是超过了1KB，则转化成KB单位
         {
-            return String.format(Locale.CHINA,"%1.2fK",size / 1024);
+            return String.format(Locale.CHINA,"%1.2fK",size / 1024.0);
         }
         else//剩下的都是小于1K的，则转化成B单位
         {
-            return String.format(Locale.CHINA, "%1.2fB",size);
+            return String.format(Locale.CHINA, "%1.2fB",(double)size);
         }
     }
 
-    static void pauseDownloadQueue(Context context, MethodChannel result, DownloadManager downloadManager, String userId, String identifier,String sessionId, boolean pause) {
+    static void pauseDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager, String identifier, boolean pause) {
         DownloadTask task = downloadManager.getTaskByRoom(
-                Integer.parseInt(identifier),//roomId
-                Integer.parseInt(sessionId)//sessionId
+                Long.parseLong(identifier),//roomId
+                0
         );
+        Map<String,Object> dict=new HashMap<>();
         if(pause){
             task.pause();
+            dict.put("code",1);
+            dict.put("msg","暂停成功");
+            result.success(dict);
         }else {
             task.restart();
+            dict.put("code",1);
+            dict.put("msg","恢复成功");
+            result.success(dict);
         }
     }
 
-    static void queryDownloadQueue(Context context, MethodChannel.Result result, DownloadManager downloadManager, String userId) {
+    static void queryDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager) {
         List<DownloadTask> arr = downloadManager.getAllTasks();
         List<Map<String,Object>> list=new ArrayList<>();
         for (DownloadTask element:arr) {
@@ -198,7 +330,7 @@ public class BJYController {
             String finaName = element.getSignalFileName();
             String coverImageUrl= "";
             DownloadModel info = element.getSignalDownloadInfo();
-            String itemIdentifier = info.url;
+            String itemIdentifier = info.roomId+"";
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
             int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
                     ((info.status== TaskStatus.Pause) ? 2 : 0));
@@ -210,15 +342,17 @@ public class BJYController {
             dict.put("itemIdentifier",itemIdentifier);
             dict.put("finaName",finaName);
             dict.put("coverImageUrl",coverImageUrl);
+            dict.put("speed",getFileSizeString(element.getSpeed()));
+
             list.add(dict);
         }
         result.success(list);
     }
 
-    static void removeDownloadQueue(Context context, MethodChannel.Result result, DownloadManager downloadManager, String userId, String identifier,String sessionId) {
+    static void removeDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,String identifier) {
         DownloadTask task = downloadManager.getTaskByRoom(
-                Integer.parseInt(identifier),//roomId
-                Integer.parseInt(sessionId)//sessionId
+                Long.parseLong(identifier),//roomId
+                0
         );
         Map<String,Object> dict=new HashMap<>();
         if(task!=null){

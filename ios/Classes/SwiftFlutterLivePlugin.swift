@@ -71,20 +71,17 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             let dic = call.arguments as! Dictionary<String, Any>
             //开启点播
             let classID = dic["classID"] as! String
-            let sessionID = dic["sessionID"] as! String
             let userId = dic["userId"] as! String
-            addingDownloadQueue(classID: classID, sessionID: sessionID, userId: userId, result: result)
+            addingDownloadQueue(classID: classID, userId: userId, result: result)
         } else if (call.method == "pauseDownloadQueue") {
             let dic = call.arguments as! Dictionary<String, Any>
             //开启点播
             let identifier = dic["identifier"] as! String
             let userId = dic["userId"] as! String
-            let pause = dic["userId"] as! Bool
+            let pause = dic["pause"] as! Bool
             pauseDownloadQueue(identifier: identifier, userId: userId, pause: pause, result: result)
         } else if (call.method == "queryDownloadQueue") {
-
             let dic = call.arguments as! Dictionary<String, Any>
-
             //开启点播
             let userId = dic["userId"] as! String
             queryDownloadQueue(userId: userId, result: result)
@@ -292,7 +289,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     }
 
     public func addingDownloadQueue(
-            classID: String, sessionID: String,
+            classID: String,
             userId: String,
             result: @escaping FlutterResult
     ) {
@@ -300,8 +297,8 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         let manager = downloadManager!
         var dict: Dictionary<String, Any> = [:]
 
-        if manager.validateItem(withClassID: classID, sessionID: sessionID) { ///可以开始下载
-            let item = manager.addDownloadItem(withClassID: classID, sessionID: sessionID, encrypted: true, preferredDefinitionList: nil) ///下载结果
+        if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
+            let item = manager.addDownloadItem(withClassID: classID, sessionID: "0", encrypted: true, preferredDefinitionList: nil) ///下载结果
             if item == nil {
                 dict["code"] = 0
                 dict["msg"] = "下载失败"

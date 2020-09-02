@@ -51,7 +51,6 @@ class FlutterLive {
     });
   }
 
-
   // 跳转在线点播
   Future<double> startVideoActivity(String userName, String userId,
       String token, String videoId, String title) async {
@@ -75,25 +74,31 @@ class FlutterLive {
     return 0;
   }
 
-
   // 添加下载任务队列
-  Future<Map> addingDownloadQueue(String classID, String sessionID, String userId) async {
+  Future<Map> addingDownloadQueue(
+      String classID, String sessionID, String userId) async {
+    // if ("addingDownloadQueue".equals(call.method)) {
+    //   String classID = call.argument("classID");
+    //   String userId = call.argument("userId");
+    //
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
       'classID': classID,
-      'sessionID': sessionID,
       'userId': userId,
     });
     return map;
   }
+
   //开始或暂停下载任务队列
-  Future<Map> pauseDownloadQueue(String userId, String identifier, bool pause) async {
+  Future<Map> pauseDownloadQueue(
+      String userId, String identifier, bool pause) async {
     final dynamic map = await _channel.invokeMethod("pauseDownloadQueue", {
-      'userId': userId,
       'identifier': identifier,
+      'userId': userId,
       'pause': pause,
     });
     return map;
   }
+
   ///查询下载队列任务
   Future<List> queryDownloadQueue(String userId) async {
     final dynamic map = await _channel.invokeMethod("queryDownloadQueue", {
@@ -101,14 +106,13 @@ class FlutterLive {
     });
     return map["data"] as List;
   }
+
   ///删除下载队列任务
-  void removeDownloadQueue(String userId,String identifier) async {
+  void removeDownloadQueue(String userId, String identifier) async {
     final dynamic map = await _channel.invokeMethod("removeDownloadQueue", {
       'identifier': identifier,
       'userId': userId,
     });
-    return ;
+    return;
   }
-
-
 }
