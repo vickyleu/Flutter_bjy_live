@@ -72,7 +72,8 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             //开启点播
             let classID = dic["classID"] as! String
             let userId = dic["userId"] as! String
-            addingDownloadQueue(classID: classID, userId: userId, result: result)
+            let token = dic["token"] as! String
+            addingDownloadQueue(classID: classID, userId: userId,token:token, result: result)
         } else if (call.method == "pauseDownloadQueue") {
             let dic = call.arguments as! Dictionary<String, Any>
             //开启点播
@@ -291,6 +292,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     public func addingDownloadQueue(
             classID: String,
             userId: String,
+            token: String,
             result: @escaping FlutterResult
     ) {
         downloadManagerCheck(userId)
@@ -298,7 +300,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         var dict: Dictionary<String, Any> = [:]
 
         if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
-            let item = manager.addDownloadItem(withClassID: classID, sessionID: "0", encrypted: true, preferredDefinitionList: nil) ///下载结果
+            let item = manager.addDownloadItem(withClassID: classID, sessionID: "0", encrypted: true, preferredDefinitionList: nil){(BJVDownloadItem item) ->
+              item.accessKey = token;
+            } ///下载结果
             if item == nil {
                 dict["code"] = 0
                 dict["msg"] = "下载失败"

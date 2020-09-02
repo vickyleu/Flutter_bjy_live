@@ -103,8 +103,8 @@ public class BJYController {
 
     // 开启下载
     static void addingDownloadQueue(Context context, MethodChannel channel,MethodChannel.Result result,DownloadManager downloadManager,
-                                    String roomId, String userId) {
-        downloadManager.newPlaybackDownloadTask(userId+0, Long.parseLong(roomId), 0, "0", "回放下载")
+                                    String roomId, String token,String userId) {
+        downloadManager.newPlaybackDownloadTask(userId+0, Long.parseLong(roomId), 0,token, "回放下载")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
