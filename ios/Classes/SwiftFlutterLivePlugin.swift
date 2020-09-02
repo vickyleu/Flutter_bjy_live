@@ -79,7 +79,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             //开启点播
             let identifier = dic["identifier"] as! String
             let userId = dic["userId"] as! String
-            let pause = dic["pause"] as! Bool
+            let pause = dic["userId"] as! Bool
             pauseDownloadQueue(identifier: identifier, userId: userId, pause: pause, result: result)
         } else if (call.method == "queryDownloadQueue") {
 
@@ -182,6 +182,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         dict["itemIdentifier"] = itemIdentifier
 
         dict["state"] = state
+        dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
         dict["finaName"] = finaName
         dict["coverImageUrl"] = coverImageUrl
 
@@ -215,6 +216,23 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     }
 
 
+
+    public func getFileSizeString(size:Float) -> String{
+        if(size >= 1024*1024)//大于1M，则转化成M单位的字符串
+      {
+        return String.init(format: "%1.2fM", size / 1024 / 1024)
+      }
+      else if(size >= 1024 && size<1024*1024) //不到1M,但是超过了1KB，则转化成KB单位
+      {
+          return String.init(format: "%1.2fK",size / 1024)
+      }
+      else//剩下的都是小于1K的，则转化成B单位
+      {
+          return String.init(format: "%1.2fB",size)
+      }
+    }
+
+
     public func queryDownloadQueue(
             userId: String,
             result: @escaping FlutterResult
@@ -238,13 +256,13 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             dict["progress"] = progress
             dict["size"] = size
             dict["state"] = state
-
+            dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
             dict["itemIdentifier"] = itemIdentifier
             dict["finaName"] = finaName
             dict["coverImageUrl"] = coverImageUrl
             arr.append(dict)
         }
-        result(["data":arr]) ///查询到的所有下载项
+        result(arr) ///查询到的所有下载项
     }
 
 
@@ -292,13 +310,14 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
                 dict["msg"] = "开始下载"
                 dict["size"] = item!.totalSize
                 dict["state"] = 0
+                dict["speed"] = "0K"
                 dict["itemIdentifier"] = item!.itemIdentifier
                 dict["finaName"] = item!.downloadFiles?.first?.fileName ?? "未知"
                 dict["coverImageUrl"] = ""
             }
         } else {///不能下载,可能是正在下载中了,或者已经下载完成
-            dict["code"] = 2
-            dict["msg"] = "文件已下载或正在下载中"
+             dict["code"] = 2
+             dict["msg"] = "文件已下载或正在下载中"
 //            let downloadItems = manager.downloadItems as [BJLDownloadItem]
 //            for item in downloadItems {
 //                if item == identifier {
