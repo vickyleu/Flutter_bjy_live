@@ -1,5 +1,10 @@
 package com.xgs.flutter_live;
 
+import android.content.Context;
+
+import com.baijiayun.download.DownloadManager;
+import com.baijiayun.download.DownloadTask;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +26,7 @@ public class FlutterLivePlugin implements MethodCallHandler, BJYController.Video
     private MethodChannel.Result result;
     private final Registrar registrar;
 
+    private DownloadManager downloadManager;
     /**
      * Plugin registration.
      */
@@ -44,16 +50,46 @@ public class FlutterLivePlugin implements MethodCallHandler, BJYController.Video
         }else if (call.method.equals("startVideo")) {
             BJYController.startBJYPVideo(registrar.activity(), new BJYVideoOption().create(call));
         }else if (call.method.equals("addingDownloadQueue")) {
-            BJYController.addingDownloadQueue(registrar.activity(), call,methodChannel);
+            String classID = call.argument("classID");
+            String sessionID = call.argument("sessionID");//todo Android和iOS不同的字段
+            String userId = call.argument("userId");
+            downloadManagerCheck(registrar.activity(),userId);
+            BJYController.addingDownloadQueue(registrar.activity(),methodChannel,result,downloadManager,classID,sessionID,userId);
         }else if (call.method.equals("pauseDownloadQueue")) {
-            BJYController.pauseDownloadQueue(registrar.activity(), call,methodChannel);
+            String identifier = call.argument("identifier");
+            String sessionId = call.argument("sessionId");//todo Android和iOS不同的字段
+            String userId = call.argument("userId");
+            boolean pause = (boolean) call.argument("pause");
+            downloadManagerCheck(registrar.activity(),userId);
+            BJYController.pauseDownloadQueue(registrar.activity(),methodChannel,downloadManager, userId,identifier,sessionId,pause);
         }else if (call.method.equals("queryDownloadQueue")) {
-            BJYController.queryDownloadQueue(registrar.activity(), call,methodChannel);
+            String userId = call.argument("userId");
+            downloadManagerCheck(registrar.activity(),userId);
+            BJYController.queryDownloadQueue(registrar.activity(),result,downloadManager, userId);
         }else if (call.method.equals("removeDownloadQueue")) {
-            BJYController.removeDownloadQueue(registrar.activity(), call,methodChannel);
+            String identifier = call.argument("identifier");
+            String sessionId = call.argument("sessionId");//todo Android和iOS不同的字段
+            String userId = call.argument("userId");
+            downloadManagerCheck(registrar.activity(),userId);
+            BJYController.removeDownloadQueue(registrar.activity(),result,downloadManager,userId,identifier,sessionId);
         }
     }
 
+     private  void  downloadManagerCheck(Context context,String userId) {
+        String identifier = "download_Identifier_"+userId;
+        if (downloadManager == null){
+            downloadManager = CustomDownloadService.getDownloadManager(context);
+        } else {
+            for (DownloadTask task:downloadManager.getAllTasks()) {
+                task.pause(); ///关闭所有下载中的任务
+            }
+        }
+         //设置缓存文件路径
+         String pathStr = context.getApplicationContext().getFilesDir().getAbsolutePath()+"/download/";
+         downloadManager.setTargetFolder(pathStr);
+         downloadManager.loadDownloadInfo(identifier,true);
+
+    }
     private FlutterLivePlugin(Registrar registrar) {
         // 设置监听
         BJYController.videoProgressListener = this;
