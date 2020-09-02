@@ -114,9 +114,9 @@ public class BJYController {
                             Log.e("视频下载","视频下载onStarted ====================");
                             double size = task.getTotalLength();
                             float progress = 0;
-                            String finaName = task.getSignalFileName();
+                            String finaName = task.getVideoFileName();
                             String coverImageUrl= "";
-                            DownloadModel info = task.getSignalDownloadInfo();
+                            DownloadModel info = task.getVideoDownloadInfo();
                             String itemIdentifier = info.roomId+"";
                             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
 
@@ -139,12 +139,10 @@ public class BJYController {
                             Log.e("视频下载","视频下载onPaused ====================");
                             double progress = task.getDownloadedLength();
                             double size = task.getTotalLength();
-                            String signalFilePath = task.getSignalFilePath();
-                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
-                            long speed = task.getSpeed();
-                            String finaName = task.getSignalFileName();
+                            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            String finaName = task.getVideoFileName();
                             String coverImageUrl= "";
-                            DownloadModel info = task.getSignalDownloadInfo();
+                            DownloadModel info = task.getVideoDownloadInfo();
                             String itemIdentifier = info.roomId+"";
                             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                             int state =2;
@@ -179,12 +177,10 @@ public class BJYController {
                             }catch (Exception ignored){}
                             double progress = task.getDownloadedLength();
                             double size = task.getTotalLength();
-                            String signalFilePath = task.getSignalFilePath();
-                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
-                            long speed = task.getSpeed();
-                            String finaName = task.getSignalFileName();
+                            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            String finaName = task.getVideoFileName();
                             String coverImageUrl= "";
-                            DownloadModel info = task.getSignalDownloadInfo();
+                            DownloadModel info = task.getVideoDownloadInfo();
                             String itemIdentifier = info.roomId+"";
                             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                             int state =3;
@@ -206,12 +202,10 @@ public class BJYController {
                             Log.e("视频下载","视频下载onFinish ===========videoFilePath："+task.getVideoFilePath());
                             double progress = task.getDownloadedLength();
                             double size = task.getTotalLength();
-                            String signalFilePath = task.getSignalFilePath();
-                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
-                            long speed = task.getSpeed();
-                            String finaName = task.getSignalFileName();
+                            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            String finaName = task.getVideoFileName();
                             String coverImageUrl= "";
-                            DownloadModel info = task.getSignalDownloadInfo();
+                            DownloadModel info = task.getVideoDownloadInfo();
                             String itemIdentifier = info.roomId+"";
                             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                             int state =1;
@@ -232,12 +226,11 @@ public class BJYController {
                         public void onProgress(DownloadTask task) {
                             double progress = task.getDownloadedLength();
                             double size = task.getTotalLength();
-                            String signalFilePath = task.getSignalFilePath();
-                            Log.e("视频下载","视频下载onProgress==="+task.getSignalFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                             long speed = task.getSpeed();
-                            String finaName = task.getSignalFileName();
+                            String finaName = task.getVideoFileName();
                             String coverImageUrl= "";
-                            DownloadModel info = task.getSignalDownloadInfo();
+                            DownloadModel info = task.getVideoDownloadInfo();
                             String itemIdentifier = info.roomId+"";
                             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                             int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
@@ -267,10 +260,7 @@ public class BJYController {
                     }catch (Exception ignored){}
                     double progress = 0;
                     double size = 0;
-                    long speed = 0;
-                    String finaName = null;
                     String coverImageUrl= "";
-                    String itemIdentifier = roomId;
                     ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                     int state =3;
                     Map<String,Object> dict=new HashMap<>();
@@ -279,8 +269,8 @@ public class BJYController {
                     dict.put("state",state);
                     dict.put("speed","0K");
 
-                    dict.put("itemIdentifier",itemIdentifier);
-                    dict.put("finaName",finaName);
+                    dict.put("itemIdentifier",roomId);
+                    dict.put("finaName",null);
                     dict.put("coverImageUrl",coverImageUrl);
 
                     channel.invokeMethod("notifyChange",  dict);
@@ -327,9 +317,9 @@ public class BJYController {
         for (DownloadTask element:arr) {
             float progress = element.getProgress();
             double size = element.getTotalLength();
-            String finaName = element.getSignalFileName();
+            String finaName = element.getVideoFileName();
             String coverImageUrl= "";
-            DownloadModel info = element.getSignalDownloadInfo();
+            DownloadModel info = element.getVideoDownloadInfo();
             String itemIdentifier = info.roomId+"";
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
             int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
