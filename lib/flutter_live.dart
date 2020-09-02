@@ -106,7 +106,8 @@ class FlutterLive {
     });
     return map["data"] as List;
   }
- ///查询下载队列任务
+
+  ///查询下载队列任务
   Future notifyChange(MethodCall call) async {
     final dynamic map = await call.arguments;
   }
