@@ -75,6 +75,11 @@ class FlutterLive {
   }
 
   // 添加下载任务队列
+  Future register() async {
+    final dynamic map = await _channel.invokeMethod("register", {});
+    return ;
+  }
+  // 添加下载任务队列
   Future<Map> addingDownloadQueue(
       String classID, String userId, String token) async {
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {

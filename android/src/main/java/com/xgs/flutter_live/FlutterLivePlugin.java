@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.baijiayun.BJYPlayerSDK;
 import com.baijiayun.download.DownloadManager;
 import com.baijiayun.download.DownloadTask;
 
@@ -28,7 +29,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  *
  * @author grey
  */
-public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCallHandler, BJYController.VideoProgressListener {
+public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCallHandler, VideoProgressListener {
 
     private static final String CHANNEL_NAME = "flutter_live";
     private  MethodChannel methodChannel;
@@ -41,6 +42,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
     public static void registerWith(Registrar registrar) {
         FlutterLivePlugin flutterLivePlugin = new FlutterLivePlugin();
         flutterLivePlugin.setupChannel(registrar.messenger());
+
     }
 
 
@@ -75,7 +77,13 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             return;
         }
         this.result = result;
-        if ("startLive".equals(call.method)) {
+        if ("register".equals(call.method)) {
+            //配置sdk
+            new BJYPlayerSDK.Builder(currentActivity.get().getApplication())
+                    .setDevelopMode(BuildConfig.DEBUG)
+                    .build();
+            return;
+        }else  if ("startLive".equals(call.method)) {
             BJYController.startLiveActivity(currentActivity.get(), new BJYLiveOption().create(call));
             return;
         }else if ("startBack".equals(call.method)) {

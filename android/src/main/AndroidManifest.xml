@@ -3,10 +3,8 @@
     package="com.xgs.flutter_live">
 
     <application
-        android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
-        android:label="flutter_live"
-        tools:replace="android:name,android:label">
+       >
 
         <meta-data
             android:name="flutterEmbedding"

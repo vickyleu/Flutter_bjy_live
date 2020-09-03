@@ -366,10 +366,6 @@ public class BJYController {
         }
     }
 
-    public interface VideoProgressListener {
 
-        void onPlayRateOfProgress(int currentTime, int duration);
-
-    }
 
 }

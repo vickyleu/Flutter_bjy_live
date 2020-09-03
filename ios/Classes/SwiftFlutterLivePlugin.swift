@@ -25,7 +25,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
 
-        if (call.method == "startLive") {
+        if (call.method == "register") {
+            let dic = call.arguments as! Dictionary<String, Any>
+            startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId)
+            result(true)
+        }else  if (call.method == "startLive") {
 
             let dic = call.arguments as! Dictionary<String, Any>
 
