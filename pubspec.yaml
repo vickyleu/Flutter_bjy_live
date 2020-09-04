@@ -11,12 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
 flutter:
-
   plugin:
-    androidPackage: com.xgs.flutter_live
-    pluginClass: FlutterLivePlugin
+    platforms:
+      android:
+        package: com.xgs.flutter_live
+        pluginClass: FlutterLivePlugin
+      ios:
+        pluginClass: FlutterLivePlugin

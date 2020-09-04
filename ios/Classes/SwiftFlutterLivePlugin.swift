@@ -27,7 +27,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         if (call.method == "register") {
             let dic = call.arguments as! Dictionary<String, Any>
-            startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId)
+        
             result(true)
         }else  if (call.method == "startLive") {
 
@@ -241,7 +241,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     ) {
         downloadManagerCheck(userId)
         let manager = downloadManager!
-        let downloadItems = manager.downloadItems as! [BJLDownloadItem]
+        let downloadItems = manager.downloadItems
         var arr: Array<Dictionary<String, Any>> = []
         for element in downloadItems {
             let progress = element.progress.totalUnitCount;
@@ -304,9 +304,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         var dict: Dictionary<String, Any> = [:]
 
         if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
-            let item = manager.addDownloadItem(withClassID: classID, sessionID: "0", encrypted: true, preferredDefinitionList: nil){(BJVDownloadItem item) ->
-              item.accessKey = token;
-            } ///下载结果
+            let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
+                  item.accessKey = token;
+            }
+            ///下载结果
             if item == nil {
                 dict["code"] = 0
                 dict["msg"] = "下载失败"
@@ -353,7 +354,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         print("requestToken")
 
-        let key = "\(classID)-\(sessionID)"
+        let key = "\(classID)-\(String(describing: sessionID))"
 
         completion(key, nil)
 
