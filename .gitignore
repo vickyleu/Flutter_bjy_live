@@ -3,6 +3,7 @@
 .idea
 #.packages
 .pub/
+.packages
 **Podfile.lock
 **.last_build_id
 build/

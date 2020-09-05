@@ -24,7 +24,12 @@ Pod::Spec.new do |s|
   s.dependency 'BJLiveCore', '~>2.9.5-txpro'
   s.dependency 'BJLiveUI',  '~>2.9.0'
 
+  ## s.libraries = ['icucore', 'c++', 'z', 'resolv', 'bz2']
+  ## s.static_framework = false
   s.static_framework = true
+
+
+
   s.ios.deployment_target = '9.0'
   s.swift_version = "5"
 
