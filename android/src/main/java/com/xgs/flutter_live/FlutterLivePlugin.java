@@ -143,7 +143,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-        currentActivity = new WeakReference<>(binding.getActivity());
+        currentActivity = new WeakReference<Activity>(binding.getActivity());
     }
 
     @Override
