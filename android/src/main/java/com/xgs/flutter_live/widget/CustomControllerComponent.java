@@ -1,7 +1,6 @@
 package com.xgs.flutter_live.widget;
 
 import android.animation.Animator;
-import com.baijiayun.videoplayer.ui.R;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -21,6 +20,7 @@ import com.baijiayun.videoplayer.event.EventKey;
 import com.baijiayun.videoplayer.event.OnPlayerEventListener;
 import com.baijiayun.videoplayer.log.BJLog;
 import com.baijiayun.videoplayer.player.PlayerStatus;
+import com.baijiayun.videoplayer.ui.R;
 import com.baijiayun.videoplayer.ui.component.BaseComponent;
 import com.baijiayun.videoplayer.ui.event.UIEventKey;
 import com.baijiayun.videoplayer.ui.listener.OnTouchGestureListener;
@@ -76,7 +76,8 @@ public class CustomControllerComponent extends BaseComponent implements OnTouchG
 
     @Override
     protected View onCreateComponentView(Context context) {
-        return View.inflate(context, R.layout.layout_controller_component_new, null);
+        return View.inflate(context, R.layout.bjy_pb_layout_controller_component_new, null);
+//        return View.inflate(context, R.layout.layout_controller_component_new, null);
     }
 
     @Override
@@ -299,7 +300,8 @@ public class CustomControllerComponent extends BaseComponent implements OnTouchG
     }
 
     private void setSwitchScreenIcon(boolean isFullScreen) {
-        mSwitchScreen.setImageResource(isFullScreen ? R.mipmap.icon_exit_full_screen : R.mipmap.icon_full_screen);
+        mSwitchScreen.setImageResource(isFullScreen ? R.drawable.icon_exit_full_screen : R.drawable.icon_full_screen);
+//        mSwitchScreen.setImageResource(isFullScreen ? R.mipmap.icon_exit_full_screen : R.mipmap.icon_full_screen);
     }
 
     private void setScreenSwitchEnable(boolean screenSwitchEnable) {

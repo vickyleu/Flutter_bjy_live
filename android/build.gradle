@@ -81,19 +81,21 @@ android {
     }
 }
 
-
+configurations {
+    all*.exclude group:'com.baijia.player', module: 'LiteAVSDK_TRTC'
+}
 
 dependencies {
-    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.0.2'
-    implementation 'com.baijia.player:VideoplayerUI:2.0.2'
+    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.2.3'
+    implementation 'com.baijia.player:VideoplayerUI:2.1.1'
     implementation 'com.baijiayun.live:group-class-ui:1.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 }
 
 
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
-flutter {
-    source '../'
-}
+//apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+//
+//flutter {
+//    source '../'
+//}

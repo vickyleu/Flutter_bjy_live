@@ -2,10 +2,8 @@ package com.xgs.flutter_live.video;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -33,8 +31,8 @@ import com.baijiayun.videoplayer.render.IRender;
 import com.baijiayun.videoplayer.ui.event.UIEventKey;
 import com.baijiayun.videoplayer.ui.utils.NetworkUtils;
 import com.baijiayun.videoplayer.ui.widget.BaseVideoView;
-import com.baijiayun.videoplayer.ui.widget.ComponentContainer;
 import com.baijiayun.videoplayer.widget.BJYPlayerView;
+import com.xgs.flutter_live.widget.FLTTComponentContainer;
 
 /**
  *
@@ -179,8 +177,8 @@ public class CustomBJYVideoView extends BaseVideoView {
     }
 
     private void initComponentContainer() {
-        componentContainer = new ComponentContainer(getContext());
-        componentContainer.init(this, new CustomComponentManager(getContext(), this.title));
+        componentContainer = new FLTTComponentContainer(getContext());
+        ((FLTTComponentContainer)componentContainer).init(this,new CustomComponentManager(getContext(), this.title));
         componentContainer.setOnComponentEventListener(internalComponentEventListener);
         addView(componentContainer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
