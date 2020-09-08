@@ -170,7 +170,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         let progress = downloadItem.progress.totalUnitCount;
         let size = downloadItem.totalSize;
         let file: BJLDownloadFile? = downloadItem.downloadFiles?.first;
-        let finaName: String = file?.fileName ?? "未知文件";
+        let fileName: String = file?.fileName ?? "未知文件";
 
         let itemIdentifier = downloadItem.itemIdentifier;
         let coverImageUrl: String = "";
@@ -185,7 +185,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         dict["state"] = state
         dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
-        dict["finaName"] = finaName
+        dict["fileName"] = fileName
         dict["coverImageUrl"] = coverImageUrl
 
         self.channel?.invokeMethod("notifyChange", arguments: dict)
@@ -247,7 +247,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             let progress = element.progress.totalUnitCount;
             let size = element.totalSize;
             let file: BJLDownloadFile? = element.downloadFiles?.first;
-            let finaName: String = file?.fileName ?? "未知文件";
+            let fileName: String = file?.fileName ?? "未知文件";
 
             let coverImageUrl: String = "";
             let itemIdentifier = element.itemIdentifier;
@@ -260,7 +260,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             dict["state"] = state
             dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
             dict["itemIdentifier"] = itemIdentifier
-            dict["finaName"] = finaName
+            dict["fileName"] = fileName
             dict["coverImageUrl"] = coverImageUrl
             arr.append(dict)
         }
@@ -305,7 +305,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
             let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
-                  item.accessKey = token;
+                  item.token = token;
             }
             ///下载结果
             if item == nil {
@@ -318,7 +318,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
                 dict["state"] = 0
                 dict["speed"] = "0K"
                 dict["itemIdentifier"] = item!.itemIdentifier
-                dict["finaName"] = item!.downloadFiles?.first?.fileName ?? "未知"
+                dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
                 dict["coverImageUrl"] = ""
             }
         } else {///不能下载,可能是正在下载中了,或者已经下载完成
@@ -332,7 +332,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 //                    dict["size"] = item!.totalSize
 //                    dict["state"] = 0
 //                    dict["itemIdentifier"] = item!.itemIdentifier
-//                    dict["finaName"] = item!.downloadFiles?.first?.fileName ?? "未知"
+//                    dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
 //                    dict["coverImageUrl"] = ""
 //                } else {
 //                    dict["code"] = 2
@@ -340,7 +340,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 //                    dict["size"] = item!.totalSize
 //                    dict["state"] = 0
 //                    dict["itemIdentifier"] = item!.itemIdentifier
-//                    dict["finaName"] = item!.downloadFiles?.first?.fileName ?? "未知"
+//                    dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
 //                    dict["coverImageUrl"] = ""
 //                }
 //                break

@@ -14,11 +14,15 @@ class BJYBackOption {
     private String roomId;
     private String token;
     private String sessionId;
+    private String userName;
+    private String userNum;
 
     BJYBackOption create(@Nonnull MethodCall call) {
         this.roomId = call.argument("roomId");
         this.token = call.argument("token");
         this.sessionId = call.argument("sessionId");
+        this.userName = call.argument("userName");
+        this.userNum = call.argument("userNum");
         return this;
     }
 
@@ -34,4 +38,11 @@ class BJYBackOption {
         return sessionId == null ? "0" : sessionId;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserNum() {
+        return userNum;
+    }
 }
