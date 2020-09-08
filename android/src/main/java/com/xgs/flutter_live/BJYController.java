@@ -200,9 +200,8 @@ public class BJYController {
             }
 
             @Override
-            public void onDeleted(DownloadTask p0) {
+            public void onDeleted(DownloadTask task) {
                 Log.e("视频下载","视频下载onDeleted ====================");
-
             }
 
             @Override
@@ -272,8 +271,7 @@ public class BJYController {
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-                int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
-                        ((info.status== TaskStatus.Pause) ? 2 : 0));
+                int state = 0;
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("progress",progress);
                 dict.put("size",size);
