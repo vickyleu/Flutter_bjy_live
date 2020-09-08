@@ -1,23 +1,38 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 /// Created  on 2019/10/12.
 /// @author grey
 /// Function :  直接跳转百家云平台
 
 typedef OnVideoProgressCallback = Function(int, int);
-class FlutterLiveDownloadModel{
-  String fileName;
-  String coverImageUrl;
-  String itemIdentifier;
-  int progress;
-  int size;
-  int state;
-  String speed;
-  FlutterLiveDownloadModel({this.fileName, this.coverImageUrl, this.itemIdentifier, this.progress, this.size, this.state, this.speed});
-}
+
 class FlutterLive {
+  Database database;
+
+  int safeToInt(dynamic field) {
+    if (field == null) return 0;
+    if (field is int) return field;
+    int f = 0;
+    try {
+      if (field.toString().contains(".")) {
+        f = double.parse(field.toString()).toInt();
+      } else {
+        f = int.parse(field.toString());
+      }
+    } catch (e) {}
+    return f;
+  }
+
+  String safeToString(dynamic field) {
+    if (field == null) return "";
+    if (field is int) return field.toString();
+    return field.toString();
+  }
+
   factory FlutterLive() => _getInstance();
 
   static FlutterLive get instance => _getInstance();
@@ -30,10 +45,11 @@ class FlutterLive {
     return _instance;
   }
 
-
-  StreamController<FlutterLiveDownloadModel> streamController=StreamController.broadcast();
+  StreamController<FlutterLiveDownloadModel> streamController =
+      StreamController.broadcast();
 
   FlutterLive._internal() {
+    _createDatabase();
     _channel = const MethodChannel('flutter_live');
     _channel.setMethodCallHandler(_methodCallHandler);
   }
@@ -57,7 +73,8 @@ class FlutterLive {
   }
 
   // 跳转在线回放
-  void startPlayBackActivity(String roomId, String token, String sessionId,String userName,String userNum) {
+  void startPlayBackActivity(String roomId, String token, String sessionId,
+      String userName, String userNum) {
     _channel.invokeMethod("startBack", {
       'roomId': roomId,
       'token': token,
@@ -93,51 +110,124 @@ class FlutterLive {
   // 添加下载任务队列
   Future register() async {
     final dynamic map = await _channel.invokeMethod("register", {});
-    return ;
+    return;
   }
+
   // 添加下载任务队列
   Future<FlutterLiveDownloadModel> addingDownloadQueue(
-      String classID, String userId, String token) async {
+      String classID,
+      String userId,
+      String token,
+      String className,
+      String coverImageUrl) async {
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
       'classID': classID,
       'userId': userId,
       'token': token,
     });
-    final int code=int.tryParse(map["code"].toString());
-    if(code==1 || code ==2){
-      final model=FlutterLiveDownloadModel(
-          fileName:safeToString(map["fileName"]),coverImageUrl:safeToString(map["coverImageUrl"]),
-          progress:safeToInt(map["progress"]), size:safeToInt(map["size"]),itemIdentifier:safeToString(map["itemIdentifier"]),
-          state:safeToInt(map["state"]),speed:safeToString(map["speed"]));
-      return model;
+    final int code = int.tryParse(map["code"].toString());
+    if (code == 1 || code == 2) {
+      map["roomId"] = classID;
+      map["userId"] = userId;
+      map["className"] = className;
+      map["coverImageUrl"] = coverImageUrl;
+      if (code == 2) {
+        // final model = await queryDownloadEntity(userId, identifier);
+        // insertModel(model);
+        // return model;
+      } else {
+        final model = parseModel(map);
+        insertModel(model);
+        return model;
+      }
     }
     return null;
   }
 
   //开始或暂停下载任务队列
-  Future<Map> pauseDownloadQueue(
+  Future<bool> pauseDownloadQueue(
       String userId, String identifier, bool pause) async {
     final dynamic map = await _channel.invokeMethod("pauseDownloadQueue", {
       'identifier': identifier,
       'userId': userId,
       'pause': pause,
     });
-    return map;
+    final int code = int.tryParse(map["code"].toString());
+    if (code == 1) {
+      try {
+        ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+        final model = await queryDownloadEntity(userId, identifier);
+        model.state = pause ? 2 : 0;
+        updateModel(model);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 
   ///查询下载队列任务
-  Future<List> queryDownloadQueue(String userId) async {
-    final dynamic map = await _channel.invokeMethod("queryDownloadQueue", {
-      'userId': userId,
-    });
-    return map["data"] as List;
+  Future<List<FlutterLiveDownloadModel>> queryDownloadQueue(
+      String userId) async {
+    final list = (await database
+            .rawQuery("SELECT * FROM BJYDownload where userId= ? ", [userId]))
+        .map((map) {
+          try {
+            return parseModel(map);
+          } catch (e) {
+            return null;
+          }
+        })
+        .skipWhile((value) => value == null)
+        .toList();
+    return list;
+  }
+
+  ///查询单个下载任务
+  Future<FlutterLiveDownloadModel> queryDownloadEntity(
+      String userId, String itemIdentifier) async {
+    final model = (await database.rawQuery(
+            "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
+            [userId, itemIdentifier]))
+        .map((map) {
+          try {
+            return parseModel(map);
+          } catch (e) {
+            return null;
+          }
+        })
+        .skipWhile((value) => value == null)
+        .toList()
+        .last;
+    return model;
   }
 
   ///查询下载队列任务
   Future notifyChange(MethodCall call) async {
     final dynamic map = await call.arguments;
     print("notifyChange===map:::${map.toString()}");
-    streamController.add(null);
+    final model =
+        await queryDownloadEntity(map["userId"], map["itemIdentifier"]);
+    mergeModel(model, map);
+    updateModel(model);
+    streamController.add(model);
+  }
+
+  FlutterLiveDownloadModel parseModel(Map map) {
+    return FlutterLiveDownloadModel(
+        roomId: safeToInt(map["roomId"]),
+        fileName: safeToString(map["fileName"]),
+        userId: safeToInt(map["userId"]),
+        path: safeToString(map["path"]),
+        className: safeToString(map["className"]),
+        coverImageUrl: safeToString(map["coverImageUrl"]),
+        itemIdentifier: safeToString(map["itemIdentifier"]),
+        progress: safeToInt(map["progress"]),
+        size: safeToInt(map["size"]),
+        state: safeToInt(map["state"]),
+        speed: safeToString(map["speed"]));
   }
 
   ///删除下载队列任务
@@ -146,27 +236,99 @@ class FlutterLive {
       'identifier': identifier,
       'userId': userId,
     });
+// Delete a record
+    await database.rawDelete(
+        'DELETE FROM BJYDownload WHERE identifier = ? and userId = ?',
+        [identifier, userId]);
     return;
   }
 
-  int safeToInt(dynamic field) {
-    if (field == null) return 0;
-    if (field is int) return field;
-    int f = 0;
-    try {
-      if (field.toString().contains(".")) {
-        f = double.parse(field.toString()).toInt();
-      } else {
-        f = int.parse(field.toString());
-      }
-    } catch (e) {}
-    return f;
+  Future<void> _createDatabase() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'fltbjydb.db');
+    database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(
+          "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT, "
+          "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
+    });
   }
 
-  String safeToString(dynamic field) {
-    if (field == null) return "";
-    if (field is int) return field.toString();
-    return field.toString();
+  Future<void> insertModel(FlutterLiveDownloadModel model) async {
+    // Insert some records in a transaction
+    await database.transaction((txn) async {
+      int id2 = await txn.rawInsert(
+          'INSERT INTO BJYDownload(roomId, itemIdentifier,userId, path, className, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            model.roomId,
+            model.itemIdentifier,
+            model.userId,
+            model.path,
+            model.className,
+            model.coverImageUrl,
+            model.state,
+            model.size,
+            model.progress
+          ]);
+      print('inserted2: $id2');
+    });
   }
 
+  Future<void> updateModel(FlutterLiveDownloadModel model) async {
+    // Update some record
+    await database.rawUpdate(
+        "UPDATE  SET BJYDownload(path, state, size, progress) VALUES(?, ?, ?, ?, ?, ?)  WHERE roomId = ? and userId = ?",
+        [
+          model.path,
+          model.state,
+          model.size,
+          model.progress,
+          model.roomId,
+          model.userId
+        ]);
+  }
+
+  ///查询下载总缓存
+  Future<int> queryDownloadTotal(String userId) async {
+// Count the records
+    return Sqflite.firstIntValue(await database
+        .rawQuery("SELECT COUNT(*) FROM BJYDownload where userId= '$userId' "));
+  }
+
+  void mergeModel(FlutterLiveDownloadModel model, Map map) {
+    model.path = safeToString(map["path"]);
+    model.progress = safeToInt(map["progress"]);
+    model.size = safeToInt(map["size"]);
+    model.state = safeToInt(map["state"]);
+    model.speed = safeToString(map["speed"]);
+  }
+}
+
+class FlutterLiveDownloadModel {
+  int roomId;
+  String fileName;
+  int userId;
+  String path;
+  String className;
+  String coverImageUrl;
+  String itemIdentifier;
+  int progress;
+  int size;
+  int state;
+  String speed;
+
+  FlutterLiveDownloadModel(
+      {this.roomId,
+      this.fileName,
+      this.userId,
+      this.path,
+      this.className,
+      this.coverImageUrl,
+      this.itemIdentifier,
+      this.progress,
+      this.size,
+      this.state,
+      this.speed});
 }

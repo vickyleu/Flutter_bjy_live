@@ -106,8 +106,8 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         let bjuser = BJLUser.init(number: num, name: name, groupID: 0, avatar: avatar, role: BJLUserRole.student)
 
-        let bjlrc = BJLIcRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser)as! BJLIcRoomViewController
-//        let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
+
+        let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
 
 
         let vc = UIApplication.shared.keyWindow?.rootViewController
@@ -171,22 +171,19 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         let size = downloadItem.totalSize;
         let file: BJLDownloadFile? = downloadItem.downloadFiles?.first;
         let fileName: String = file?.fileName ?? "未知文件";
-
         let itemIdentifier = downloadItem.itemIdentifier;
-        let coverImageUrl: String = "";
+        let path = file?.filePath;
         ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
         let state: Int = (downloadItem.state == BJLDownloadItemState.completed) ? 1 : ((downloadItem.state == BJLDownloadItemState.invalid) ? 3 : ((downloadItem.state == BJLDownloadItemState.paused) ? 2 : 0));
         var dict: Dictionary<String, Any> = [:]
-
         dict["progress"] = progress
         dict["size"] = size
-
+        dict["path"] = path
         dict["itemIdentifier"] = itemIdentifier
 
         dict["state"] = state
         dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
         dict["fileName"] = fileName
-        dict["coverImageUrl"] = coverImageUrl
 
         self.channel?.invokeMethod("notifyChange", arguments: dict)
     }
@@ -248,8 +245,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             let size = element.totalSize;
             let file: BJLDownloadFile? = element.downloadFiles?.first;
             let fileName: String = file?.fileName ?? "未知文件";
-
-            let coverImageUrl: String = "";
+            let path = file?.filePath;
             let itemIdentifier = element.itemIdentifier;
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
             let state: Int = (element.state == BJLDownloadItemState.completed) ? 1 : ((element.state == BJLDownloadItemState.invalid) ? 3 : ((element.state == BJLDownloadItemState.paused) ? 2 : 0));
@@ -258,10 +254,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             dict["progress"] = progress
             dict["size"] = size
             dict["state"] = state
+            dict["path"] = path
             dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
             dict["itemIdentifier"] = itemIdentifier
             dict["fileName"] = fileName
-            dict["coverImageUrl"] = coverImageUrl
+
             arr.append(dict)
         }
         result(arr) ///查询到的所有下载项
@@ -305,7 +302,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
             let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
-                  item.token = token;
+                  item.accessKey = token;
             }
             ///下载结果
             if item == nil {
@@ -315,36 +312,15 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
                 dict["code"] = 1
                 dict["msg"] = "开始下载"
                 dict["size"] = item!.totalSize
+                dict["path"] = item!.downloadFiles?.first?.filePath
                 dict["state"] = 0
                 dict["speed"] = "0K"
                 dict["itemIdentifier"] = item!.itemIdentifier
                 dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
-                dict["coverImageUrl"] = ""
             }
         } else {///不能下载,可能是正在下载中了,或者已经下载完成
              dict["code"] = 2
              dict["msg"] = "文件已下载或正在下载中"
-//            let downloadItems = manager.downloadItems as [BJLDownloadItem]
-//            for item in downloadItems {
-//                if item == identifier {
-//                    dict["code"] = 1
-//                    dict["msg"] = "开始下载"
-//                    dict["size"] = item!.totalSize
-//                    dict["state"] = 0
-//                    dict["itemIdentifier"] = item!.itemIdentifier
-//                    dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
-//                    dict["coverImageUrl"] = ""
-//                } else {
-//                    dict["code"] = 2
-//                    dict["msg"] = "文件已下载"
-//                    dict["size"] = item!.totalSize
-//                    dict["state"] = 0
-//                    dict["itemIdentifier"] = item!.itemIdentifier
-//                    dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
-//                    dict["coverImageUrl"] = ""
-//                }
-//                break
-//            }
         }
         result(dict) ///下载结果
     }

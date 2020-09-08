@@ -132,18 +132,16 @@ public class BJYController {
                     }catch (Exception ignored){}
                     double progress = 0;
                     double size = 0;
-                    String coverImageUrl= "";
                     ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                     int state =3;
                     Map<String,Object> dict=new HashMap<>();
                     dict.put("progress",progress);
                     dict.put("size",size);
                     dict.put("state",state);
+                    dict.put("path",null);
                     dict.put("speed","0K");
-
                     dict.put("itemIdentifier",roomId);
                     dict.put("fileName",null);
-                    dict.put("coverImageUrl",coverImageUrl);
 
                     channel.invokeMethod("notifyChange",  dict);
                 }).toString();
@@ -158,7 +156,7 @@ public class BJYController {
                 double size = task.getTotalLength();
                 float progress = 0;
                 String fileName = task.getVideoFileName();
-                String coverImageUrl= "";
+                String path = task.getVideoFilePath();
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
@@ -169,11 +167,11 @@ public class BJYController {
                 dict.put("speed","0K");
                 dict.put("progress",progress);
                 dict.put("size",size);
+                dict.put("path",path);
                 dict.put("state",0);
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                dict.put("coverImageUrl",coverImageUrl);
                 result.success(dict);
             }
 
@@ -184,7 +182,7 @@ public class BJYController {
                 double size = task.getTotalLength();
                 Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 String fileName = task.getVideoFileName();
-                String coverImageUrl= "";
+                String path = task.getVideoFilePath();
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
@@ -193,12 +191,11 @@ public class BJYController {
                 dict.put("progress",progress);
                 dict.put("size",size);
                 dict.put("state",state);
+                dict.put("path",path);
                 dict.put("speed","0K");
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                dict.put("coverImageUrl",coverImageUrl);
-
                 channel.invokeMethod("notifyChange",  dict);
             }
 
@@ -222,7 +219,7 @@ public class BJYController {
                 double size = task.getTotalLength();
                 Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 String fileName = task.getVideoFileName();
-                String coverImageUrl= "";
+                String path = task.getVideoFilePath();
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
@@ -231,12 +228,11 @@ public class BJYController {
                 dict.put("progress",progress);
                 dict.put("size",size);
                 dict.put("state",state);
+                dict.put("path",path);
                 dict.put("speed","0K");
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                dict.put("coverImageUrl",coverImageUrl);
-
                 channel.invokeMethod("notifyChange",  dict);
             }
 
@@ -247,20 +243,20 @@ public class BJYController {
                 double size = task.getTotalLength();
                 Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 String fileName = task.getVideoFileName();
-                String coverImageUrl= "";
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
+                String path = task.getVideoFilePath();
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
                 int state =1;
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("progress",progress);
                 dict.put("size",size);
                 dict.put("state",state);
+                dict.put("path",path);
                 dict.put("speed","0K");
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                dict.put("coverImageUrl",coverImageUrl);
 
                 channel.invokeMethod("notifyChange",  dict);
             }
@@ -272,7 +268,7 @@ public class BJYController {
                 Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 long speed = task.getSpeed();
                 String fileName = task.getVideoFileName();
-                String coverImageUrl= "";
+                String path = task.getVideoFilePath();
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
                 ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
@@ -282,12 +278,11 @@ public class BJYController {
                 dict.put("progress",progress);
                 dict.put("size",size);
                 dict.put("state",state);
+                dict.put("path",path);
                 dict.put("speed",getFileSizeString(speed));
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                dict.put("coverImageUrl",coverImageUrl);
-
                 channel.invokeMethod("notifyChange",  dict);
             }
         };
@@ -334,9 +329,9 @@ public class BJYController {
             float progress = element.getProgress();
             double size = element.getTotalLength();
             String fileName = element.getVideoFileName();
-            String coverImageUrl= "";
             DownloadModel info = element.getVideoDownloadInfo();
             String itemIdentifier = info.roomId+"";
+            String path = element.getVideoFilePath();
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
             int state = (info.status == TaskStatus.Finish) ? 1 : ((info.status == TaskStatus.Error||info.status == TaskStatus.Cancel) ? 3 :
                     ((info.status== TaskStatus.Pause) ? 2 : 0));
@@ -344,10 +339,10 @@ public class BJYController {
             dict.put("progress",progress);
             dict.put("size",size);
             dict.put("state",state);
+            dict.put("path",path);
 
             dict.put("itemIdentifier",itemIdentifier);
             dict.put("fileName",fileName);
-            dict.put("coverImageUrl",coverImageUrl);
             dict.put("speed",getFileSizeString(element.getSpeed()));
 
             list.add(dict);

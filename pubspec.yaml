@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  sqflite: any
+  synchronized: any
+  path: any
 
 flutter:
   plugin:
