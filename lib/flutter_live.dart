@@ -118,6 +118,7 @@ class FlutterLive {
       String classID,
       String userId,
       String token,
+      String courseName,
       String className,
       String coverImageUrl) async {
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
@@ -130,6 +131,7 @@ class FlutterLive {
       map["roomId"] = classID;
       map["userId"] = userId;
       map["className"] = className;
+      map["courseName"] = className;
       map["coverImageUrl"] = coverImageUrl;
       if (code == 2) {
         // final model = await queryDownloadEntity(userId, identifier);
@@ -185,6 +187,24 @@ class FlutterLive {
     return list;
   }
 
+  ///查询下载队列任务
+  Future<List<FlutterLiveDownloadModel>> queryDownloadQueueForRoomIds(
+      String userId, List<String> roomIds) async {
+    final list = (await database.rawQuery(
+            "SELECT * FROM BJYDownload where userId= ? and roomId in ?",
+            [userId, "( ${roomIds.join(",").toString()} )"]))
+        .map((map) {
+          try {
+            return parseModel(map);
+          } catch (e) {
+            return null;
+          }
+        })
+        .skipWhile((value) => value == null)
+        .toList();
+    return list;
+  }
+
   ///查询单个下载任务
   Future<FlutterLiveDownloadModel> queryDownloadEntity(
       String userId, String itemIdentifier) async {
@@ -222,6 +242,7 @@ class FlutterLive {
         userId: safeToInt(map["userId"]),
         path: safeToString(map["path"]),
         className: safeToString(map["className"]),
+        courseName: safeToString(map["courseName"]),
         coverImageUrl: safeToString(map["coverImageUrl"]),
         itemIdentifier: safeToString(map["itemIdentifier"]),
         progress: safeToInt(map["progress"]),
@@ -251,7 +272,7 @@ class FlutterLive {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT, "
+          "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
           "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
     });
   }
@@ -260,13 +281,14 @@ class FlutterLive {
     // Insert some records in a transaction
     await database.transaction((txn) async {
       int id2 = await txn.rawInsert(
-          'INSERT INTO BJYDownload(roomId, itemIdentifier,userId, path, className, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [
             model.roomId,
             model.itemIdentifier,
             model.userId,
             model.path,
             model.className,
+            model.courseName,
             model.coverImageUrl,
             model.state,
             model.size,
@@ -312,6 +334,7 @@ class FlutterLiveDownloadModel {
   int userId;
   String path;
   String className;
+  String courseName;
   String coverImageUrl;
   String itemIdentifier;
   int progress;
@@ -325,6 +348,7 @@ class FlutterLiveDownloadModel {
       this.userId,
       this.path,
       this.className,
+      this.courseName,
       this.coverImageUrl,
       this.itemIdentifier,
       this.progress,
