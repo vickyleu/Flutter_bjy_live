@@ -176,6 +176,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
         let state: Int = (downloadItem.state == BJLDownloadItemState.completed) ? 1 : ((downloadItem.state == BJLDownloadItemState.invalid) ? 3 : ((downloadItem.state == BJLDownloadItemState.paused) ? 2 : 0));
         var dict: Dictionary<String, Any> = [:]
+
         dict["progress"] = progress
         dict["size"] = size
         dict["path"] = path
