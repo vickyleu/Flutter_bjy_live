@@ -46,7 +46,7 @@ class FlutterLive {
   }
 
   StreamController<FlutterLiveDownloadModel> streamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   FlutterLive._internal() {
     _createDatabase();
@@ -174,14 +174,14 @@ class FlutterLive {
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueue(
       String userId) async {
     final list = (await database
-            .rawQuery("SELECT * FROM BJYDownload where userId= ? ", [userId]))
+        .rawQuery("SELECT * FROM BJYDownload where userId= ? ", [userId]))
         .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
+      try {
+        return parseModel(map);
+      } catch (e) {
+        return null;
+      }
+    })
         .skipWhile((value) => value == null)
         .toList();
     return list;
@@ -190,18 +190,18 @@ class FlutterLive {
   ///查询下载队列任务
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueueForRoomIds(
       String userId, List<String> roomIds) async {
-    final list = (await database.rawQuery(
-            "SELECT * FROM BJYDownload where userId= ? and roomId in ?",
-            [userId, "( ${roomIds.join(",").toString()} )"]))
-        .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
+    final ids="${roomIds.join(",").toString()}";
+    print("queryDownloadQueueForRoomIds  ids::${ids}");
+    final list = (await database.query("BJYDownload",where: "userId= ? and roomId in ( ? )",whereArgs:[userId,ids] )).map((map) {
+      try {
+        return parseModel(map);
+      } catch (e) {
+        return null;
+      }
+    })
         .skipWhile((value) => value == null)
         .toList();
+    print("database.rawQuery  millisecondsSinceEpoch::${DateTime.now().millisecondsSinceEpoch}");
     return list;
   }
 
@@ -209,15 +209,15 @@ class FlutterLive {
   Future<FlutterLiveDownloadModel> queryDownloadEntity(
       String userId, String itemIdentifier) async {
     final model = (await database.rawQuery(
-            "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
-            [userId, itemIdentifier]))
+        "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
+        [userId, itemIdentifier]))
         .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
+      try {
+        return parseModel(map);
+      } catch (e) {
+        return null;
+      }
+    })
         .skipWhile((value) => value == null)
         .toList()
         .last;
@@ -229,7 +229,7 @@ class FlutterLive {
     final dynamic map = await call.arguments;
     print("notifyChange===map:::${map.toString()}");
     final model =
-        await queryDownloadEntity(map["userId"], map["itemIdentifier"]);
+    await queryDownloadEntity(map["userId"], map["itemIdentifier"]);
     mergeModel(model, map);
     updateModel(model);
     streamController.add(model);
@@ -265,16 +265,17 @@ class FlutterLive {
   }
 
   Future<void> _createDatabase() async {
+    Sqflite.devSetDebugModeOn(true);
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'fltbjydb.db');
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-      // When creating the db, create the table
-      await db.execute(
-          "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
-          "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
-    });
+          // When creating the db, create the table
+          await db.execute(
+              "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
+                  "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
+        });
   }
 
   Future<void> insertModel(FlutterLiveDownloadModel model) async {
@@ -344,15 +345,15 @@ class FlutterLiveDownloadModel {
 
   FlutterLiveDownloadModel(
       {this.roomId,
-      this.fileName,
-      this.userId,
-      this.path,
-      this.className,
-      this.courseName,
-      this.coverImageUrl,
-      this.itemIdentifier,
-      this.progress,
-      this.size,
-      this.state,
-      this.speed});
+        this.fileName,
+        this.userId,
+        this.path,
+        this.className,
+        this.courseName,
+        this.coverImageUrl,
+        this.itemIdentifier,
+        this.progress,
+        this.size,
+        this.state,
+        this.speed});
 }
