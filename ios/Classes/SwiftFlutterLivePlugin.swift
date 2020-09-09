@@ -5,7 +5,7 @@ import BJLiveUI
 import BJPlaybackUI
 import BJVideoPlayerCore
 
-public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDelegate, BJLDownloadManagerDelegate {
+public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManagerDelegate {
     var downloadManager: BJVDownloadManager?;
 
     let channel: FlutterMethodChannel?;
@@ -27,7 +27,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
 
         if (call.method == "register") {
             let dic = call.arguments as! Dictionary<String, Any>
-        
             result(true)
         }else  if (call.method == "startLive") {
 
@@ -120,7 +119,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     public func startBack(roomId: String, token: String, sessionId: String) {
 
 
-        BJVideoPlayerCore.tokenDelegate = self
+        BJVideoPlayerCore.tokenDelegate = nil
 
         let bjpvc = BJPRoomViewController.onlinePlaybackRoom(withClassID: roomId, sessionID: sessionId, token: token) as! BJPRoomViewController
 
@@ -134,7 +133,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
     public func startVideo(videoId: String, token: String, userName: String, userId: String, title: String, result: @escaping FlutterResult) {
 
 
-        BJVideoPlayerCore.tokenDelegate = self
+        BJVideoPlayerCore.tokenDelegate = nil
 
         let bjpvc = BJYDBViewController.init()
         bjpvc.token = token
@@ -202,7 +201,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
                     item.pause()
                     result(["code": 1, "msg": "暂停成功"])
                 } else {
-                    item.downloadManager.delegate = self
                     item.resume()
                     result(["code": 1, "msg": "恢复成功"])
                 }
@@ -280,6 +278,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
         }
+        downloadManager?.delegate = self
     }
 
 
@@ -306,7 +305,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
                   item.accessKey = token;
             }
-            item.downloadManager.delegate = self
             ///下载结果
             if item == nil {
                 dict["code"] = 0
@@ -327,22 +325,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
         }
         result(dict) ///下载结果
     }
-
-
-    public func requestToken(withClassID classID: String, sessionID: String?, completion: @escaping (String?, Error?) -> Void) {
-
-        print("requestToken")
-
-        let key = "\(classID)-\(String(describing: sessionID))"
-
-        completion(key, nil)
-
-    }
-
-    public func requestToken(withVideoID videoID: String, completion: @escaping (String?, Error?) -> Void) {
-        completion(videoID, nil)
-    }
-
 
 }
 
