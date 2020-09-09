@@ -265,9 +265,10 @@ class FlutterLive {
       'identifier': identifier,
       'userId': userId,
     });
+    print("Delete a record removeDownloadQueue");
 // Delete a record
     int count=await database.rawDelete(
-        'DELETE FROM BJYDownload WHERE identifier = ? and userId = ?',
+        'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
         [identifier, userId]);
     print("Delete a record count:$count");
     return;
@@ -275,6 +276,7 @@ class FlutterLive {
 
   Future<void> _createDatabase() async {
     Sqflite.devSetDebugModeOn(true);
+    // Sqflite.setDebugModeOn(const bool.fromEnvironment("dart.vm.product"));
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'fltbjydb.db');

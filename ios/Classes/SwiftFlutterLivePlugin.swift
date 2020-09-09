@@ -217,6 +217,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
 
 
     public func getFileSizeString(size:Float) -> String{
+       if(size < 0){
+       size=0
+       }
         if(size >= 1024*1024)//大于1M，则转化成M单位的字符串
       {
         return String.init(format: "%1.2fM", size / 1024 / 1024)
