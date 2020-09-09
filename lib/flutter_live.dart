@@ -260,15 +260,16 @@ class FlutterLive {
   }
 
   ///删除下载队列任务
-  void removeDownloadQueue(String userId, String identifier) async {
+  Future<void> removeDownloadQueue(String userId, String identifier) async {
     final dynamic map = await _channel.invokeMethod("removeDownloadQueue", {
       'identifier': identifier,
       'userId': userId,
     });
 // Delete a record
-    await database.rawDelete(
+    int count=await database.rawDelete(
         'DELETE FROM BJYDownload WHERE identifier = ? and userId = ?',
         [identifier, userId]);
+    print("Delete a record count:$count");
     return;
   }
 
