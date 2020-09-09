@@ -202,6 +202,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
                     item.pause()
                     result(["code": 1, "msg": "暂停成功"])
                 } else {
+                    item.downloadManager.delegate = self
                     item.resume()
                     result(["code": 1, "msg": "恢复成功"])
                 }
@@ -305,6 +306,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJVRequestTokenDel
             let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
                   item.accessKey = token;
             }
+            item.downloadManager.delegate = self
             ///下载结果
             if item == nil {
                 dict["code"] = 0
