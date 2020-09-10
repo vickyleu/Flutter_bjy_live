@@ -175,6 +175,38 @@ class FlutterLive {
     }
   }
 
+
+  //开始或暂停下载任务队列
+  Future<bool> pauseAllDownload(String userId,bool pause) async {
+    final dynamic map = await _channel.invokeMethod("pauseAllDownloadQueue", {
+      'userId': userId,
+      'pause': pause,
+    });
+    final int code = int.tryParse(map["code"].toString());
+    if (code == 1) {
+      try {
+        final stream=Stream.fromFutures((map["data"] as List).map((element) async {
+          final identifier= element["itemIdentifier"];
+          ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+          final model = await queryDownloadEntity(userId, identifier);
+          if(model!=null){
+            model.state = element["state"];
+            updateModel(model);
+          }
+          return model;
+        }).toList());
+        await for(var s in stream){
+          print("model::${s.toString()}");
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
   ///查询下载队列任务
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueue(
       String userId) async {

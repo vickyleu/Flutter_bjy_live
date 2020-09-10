@@ -1,9 +1,7 @@
 package com.xgs.flutter_live;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,7 +13,6 @@ import com.baijiayun.download.DownloadModel;
 import com.baijiayun.download.DownloadTask;
 import com.baijiayun.download.constant.TaskStatus;
 import com.baijiayun.groupclassui.InteractiveClassUI;
-import com.baijiayun.live.ui.LiveSDKWithUI;
 import com.baijiayun.livecore.context.LPConstants;
 import com.baijiayun.videoplayer.ui.bean.VideoPlayerConfig;
 import com.baijiayun.videoplayer.ui.playback.PBRoomUI;
@@ -28,12 +25,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 
 /**
  * Created  on 2019/10/26.
@@ -301,9 +294,56 @@ public class BJYController {
         }
     }
 
-    static void pauseDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager, String identifier, boolean pause) {
+    static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause) {
+        List<DownloadTask> tasks = downloadManager.getAllTasks();
+        List<Map<String,Object>>list=new ArrayList<>();
+        for (DownloadTask task:tasks) {
+            double progress = task.getDownloadedLength();
+            double size = task.getTotalLength();
+            String fileName = task.getVideoFileName();
+            DownloadModel info = task.getVideoDownloadInfo();
+            String itemIdentifier = info.roomId+"";
+            String path = task.getVideoFilePath();
+            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+            Map<String,Object> dict=new HashMap<>();
+            dict.put("progress",progress);
+            dict.put("size",size);
+            dict.put("path",path);
+            dict.put("speed","0K");
+            dict.put("itemIdentifier",itemIdentifier);
+            dict.put("fileName",fileName);
+            if(task.getTaskStatus() != TaskStatus.Error && task.getTaskStatus()  != TaskStatus.Finish){
+                if (pause) {
+                    task.pause();
+                    dict.put("state",2);
+                } else {
+                    task.restart();
+                    dict.put("state",0);
+                }
+            }else if(task.getTaskStatus()==TaskStatus.Error){
+                dict.put("state",3);
+            }else if(task.getTaskStatus()== TaskStatus.Finish){
+                dict.put("state",1);
+            }
+            list.add(dict);
+        }
+
+        Map<String,Object> dict=new HashMap<>();
+        if(pause){
+            dict.put("code",1);
+            dict.put("msg","暂停成功");
+            dict.put("data",list);
+            result.success(dict);
+        }else {
+            dict.put("code",1);
+            dict.put("msg","恢复成功");
+            dict.put("data",list);
+            result.success(dict);
+        }
+    }
+    static void pauseDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager, String roomId, boolean pause) {
         DownloadTask task = downloadManager.getTaskByRoom(
-                Long.parseLong(identifier),//roomId
+                Long.parseLong(roomId),//roomId
                 0
         );
         Map<String,Object> dict=new HashMap<>();
@@ -348,9 +388,9 @@ public class BJYController {
         result.success(list);
     }
 
-    static void removeDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,String identifier) {
+    static void removeDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,String roomId) {
         DownloadTask task = downloadManager.getTaskByRoom(
-                Long.parseLong(identifier),//roomId
+                Long.parseLong(roomId),//roomId
                 0
         );
         Map<String,Object> dict=new HashMap<>();

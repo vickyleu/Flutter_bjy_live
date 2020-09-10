@@ -84,6 +84,12 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             let userId = dic["userId"] as! String
             let pause = dic["pause"] as! Bool
             pauseDownloadQueue(identifier: identifier, userId: userId, pause: pause, result: result)
+        } else if (call.method == "pauseAllDownloadQueue") {
+            let dic = call.arguments as! Dictionary<String, Any>
+            //开启点播
+            let userId = dic["userId"] as! String
+            let pause = dic["pause"] as! Bool
+            pauseAllDownloadQueue(userId: userId, pause: pause, result: result)
         } else if (call.method == "queryDownloadQueue") {
             let dic = call.arguments as! Dictionary<String, Any>
             //开启点播
@@ -188,6 +194,49 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         self.channel?.invokeMethod("notifyChange", arguments: dict)
     }
     
+    public func pauseAllDownloadQueue(userId: String, pause: Bool,
+                                      result: @escaping FlutterResult
+    ) {
+        downloadManagerCheck(userId)
+        let manager = downloadManager!
+        let downloadItems = manager.downloadItems as [BJLDownloadItem]
+        var list:Array<Dictionary<String,Any>> = [];
+        for item in downloadItems {
+            let progress = item.progress.totalUnitCount;
+            let size = item.totalSize;
+            let file: BJLDownloadFile? = item.downloadFiles?.first;
+            let fileName: String = file?.fileName ?? "未知文件";
+            let itemIdentifier = item.itemIdentifier;
+            let path = file?.filePath;
+            var dict: Dictionary<String, Any> = [:]
+            dict["progress"] = progress
+            dict["size"] = size
+            dict["path"] = path
+            dict["itemIdentifier"] = itemIdentifier
+            dict["speed"] = "0k"
+            dict["fileName"] = fileName
+            if(item.state != BJLDownloadItemState.invalid && item.state != BJLDownloadItemState.completed){
+                if pause {
+                    item.pause()
+                    dict["state"] = 2
+                } else {
+                    item.resume()
+                    dict["state"] = 0
+                }
+            }else if(item.state == BJLDownloadItemState.invalid){
+                 dict["state"] = 3
+            }else if(item.state == BJLDownloadItemState.completed){
+                 dict["state"] = 1
+            }
+            list.append(dict);
+        }
+        if pause {
+            result(["code": 1, "msg": "暂停成功", "data": list])
+        } else {
+            result(["code": 1, "msg": "恢复成功", "data": list])
+        }
+    }
+    
     public func pauseDownloadQueue(
         identifier: String, userId: String, pause: Bool,
         result: @escaping FlutterResult
@@ -274,7 +323,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let identifier = "download_Identifier_\(userId)"
         if downloadManager == nil {
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
-             downloadManager!.delegate = self
+            downloadManager!.delegate = self
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             let downloadItems = manager.downloadItems(withStatesArray: [NSNumber(value: BJLDownloadItemState.running.rawValue), NSNumber(value: NSNotFound)]) as! [BJLDownloadItem]
@@ -283,7 +332,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                 element.pause() ///关闭所有下载中的任务
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
-             downloadManager!.delegate = self
+            downloadManager!.delegate = self
         }
     }
     
