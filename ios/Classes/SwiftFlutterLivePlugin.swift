@@ -274,6 +274,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let identifier = "download_Identifier_\(userId)"
         if downloadManager == nil {
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+             downloadManager!.delegate = self
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             let downloadItems = manager.downloadItems(withStatesArray: [NSNumber(value: BJLDownloadItemState.running.rawValue), NSNumber(value: NSNotFound)]) as! [BJLDownloadItem]
@@ -282,8 +283,8 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                 element.pause() ///关闭所有下载中的任务
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+             downloadManager!.delegate = self
         }
-        downloadManager?.delegate = self
     }
     
     
