@@ -244,6 +244,7 @@ class FlutterLive {
   ///查询单个下载任务
   Future<FlutterLiveDownloadModel> queryDownloadEntity(
       String userId, String itemIdentifier) async {
+    if(userId==null||itemIdentifier==null)return null;
     final model = (await database.rawQuery(
             "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
             [userId, itemIdentifier]))
@@ -264,8 +265,10 @@ class FlutterLive {
   Future notifyChange(MethodCall call) async {
     final dynamic map = await call.arguments;
     print("notifyChange===map:::${map.toString()}");
+    String userId = map["userId"];
+    if(userId==null)return;
     final model =
-        await queryDownloadEntity(map["userId"], map["itemIdentifier"]);
+        await queryDownloadEntity(userId, map["itemIdentifier"]);
     mergeModel(model, map);
     updateModel(model);
     streamController.add(model);
