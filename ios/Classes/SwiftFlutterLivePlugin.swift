@@ -373,6 +373,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                 dict["speed"] = "0K"
                 dict["itemIdentifier"] = item!.itemIdentifier
                 dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
+                item!.resume()
             }
         } else {///不能下载,可能是正在下载中了,或者已经下载完成
             dict["code"] = 2
