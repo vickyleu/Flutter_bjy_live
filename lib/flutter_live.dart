@@ -183,7 +183,6 @@ class FlutterLive {
     });
     final int code = int.tryParse(map["code"].toString());
     if (code == 1) {
-      mUserId
       try {
         final stream =
             Stream.fromFutures((map["data"] as List).map((element) async {
@@ -281,10 +280,13 @@ class FlutterLive {
       try {
         if (userId == null) return;
         final model = await queryDownloadEntity(userId, map["itemIdentifier"]);
-        mergeModel(model, map);
-        insertOrUpdateModel(model);
-        streamController.sink.add(model);
-        print("streamController.add(model)");
+        if (model != null) {
+          mergeModel(model, map);
+          if (model.state == 3) {}
+          insertOrUpdateModel(model);
+          streamController.add(model);
+          print("streamController.add(${model.toString()})");
+        }
       } catch (e) {
         print("streamController.adde.toString()(${e.toString()})");
       }
@@ -313,11 +315,11 @@ class FlutterLive {
       'identifier': identifier,
       'userId': userId,
     });
-    // Delete a record
-    int count = await database.rawDelete(
-        'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
-        [identifier, userId]);
-    print("Delete a record count:$count");
+    await database.transaction((txn) async {
+      await txn.execute(
+          'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
+          [identifier, userId]);
+    });
     return;
   }
 

@@ -5,8 +5,9 @@ import BJLiveUI
 import BJPlaybackUI
 import BJVideoPlayerCore
 
-public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManagerDelegate {
+public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDelegate,BJLDownloadManagerDelegate {
     var downloadManager: BJVDownloadManager?;
+    var handler:DownloadHandler?;
     
     let channel: FlutterMethodChannel?;
     
@@ -22,7 +23,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let instance = SwiftFlutterLivePlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+    public func downloadManager(_ downloadManager: BJLDownloadManager, downloadItem: BJLDownloadItem,
+                                didChange change: BJLPropertyChange<AnyObject>){
+        self.handler?.downloadManager(self.channel, downloadManager, downloadItem: downloadItem, didChange: change)
+    }
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         
         if (call.method == "register") {
@@ -166,35 +170,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         
     }
  
-    public func downloadManager(_ downloadManager: BJLDownloadManager, downloadItem: BJLDownloadItem, didChange change: BJLPropertyChange<AnyObject>) {
-        let index = downloadManager.downloadItems.firstIndex(of: downloadItem)
-        if (index == NSNotFound) {
-            return;
-        }
-        let progress = downloadItem.progress.completedUnitCount;
-        let size = downloadItem.totalSize;
-        let file: BJLDownloadFile? = downloadItem.downloadFiles?.first;
-        let fileName: String = file?.fileName ?? "未知文件";
-        let itemIdentifier = downloadItem.itemIdentifier;
-        let path = file?.filePath;
-        ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-        let state: Int = (downloadItem.state == BJLDownloadItemState.completed) ? 1 : ((downloadItem.state == BJLDownloadItemState.invalid) ? 3 : ((downloadItem.state == BJLDownloadItemState.paused) ? 2 : 0));
-        var dict: Dictionary<String, Any> = [:]
-        let userId=downloadManager.identifier
-        
-        dict["progress"] = progress
-        dict["size"] = size
-        dict["path"] = path
-        dict["userId"] = userId
-        dict["itemIdentifier"] = itemIdentifier
-        
-        dict["state"] = state
-        print("bytesPerSecond:\(downloadItem.bytesPerSecond)  downloadItem.state:\(downloadItem.state.rawValue)")
-        dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
-        dict["fileName"] = fileName
-        
-        self.channel?.invokeMethod("notifyChange", arguments: dict)
-    }
+    
     
     public func pauseAllDownloadQueue(userId: String, pause: Bool,
                                       result: @escaping FlutterResult
@@ -218,7 +194,16 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             dict["itemIdentifier"] = itemIdentifier
             dict["speed"] = "0K"
             dict["fileName"] = fileName
-            if(item.state != BJLDownloadItemState.invalid && item.state != BJLDownloadItemState.completed){
+            if(item.state == BJLDownloadItemState.completed&&item.error==nil){
+                dict["state"] = 1 //下载完成
+            }else if((item.state==BJLDownloadItemState.paused&&item.error != nil)||(item.state == BJLDownloadItemState.completed&&item.error != nil)){  ///下载中出错,或者下载文件丢失
+                if pause {
+                    dict["state"] = 3
+                } else {
+                    item.resume()
+                    dict["state"] = 0
+                }
+            }else  if(item.state != BJLDownloadItemState.invalid){
                 if pause {
                     item.pause()
                     dict["state"] = 2
@@ -226,11 +211,22 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                     item.resume()
                     dict["state"] = 0
                 }
-            }else if(item.state == BJLDownloadItemState.invalid){
-                dict["state"] = 3
-            }else if(item.state == BJLDownloadItemState.completed){
-                dict["state"] = 1
+            }else if(item.state==BJLDownloadItemState.paused){
+                if pause {
+                    dict["state"] = 2
+                } else {
+                    item.resume()
+                    dict["state"] = 0
+                }
+            }else {
+                if pause {
+                    dict["state"] = 3
+                } else {
+                    item.resume()
+                    dict["state"] = 0
+                }
             }
+            
             list.append(dict);
         }
         if pause {
@@ -268,26 +264,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
     
     
     
-    public func getFileSizeString(size:Float) -> String{
-        let sizeCopy = size
-        if(sizeCopy <= 0){
-            return "0K"
-        }
-        if(sizeCopy >= 1024*1024)//大于1M，则转化成M单位的字符串
-        {
-            return String.init(format: "%1.2fM", sizeCopy / 1024 / 1024)
-        }
-        else if(sizeCopy >= 1024 && sizeCopy<1024*1024) //不到1M,但是超过了1KB，则转化成KB单位
-        {
-            return String.init(format: "%1.2fK",sizeCopy / 1024)
-        }
-        else//剩下的都是小于1K的，则转化成B单位
-        {
-            return String.init(format: "%1.2fB",sizeCopy)
-        }
-    }
-    
-    
     public func queryDownloadQueue(
         userId: String,
         result: @escaping FlutterResult
@@ -304,7 +280,8 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             let path = file?.filePath;
             let itemIdentifier = element.itemIdentifier;
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-            let state: Int = (element.state == BJLDownloadItemState.completed) ? 1 : ((element.state == BJLDownloadItemState.invalid) ? 3 : ((element.state == BJLDownloadItemState.paused) ? 2 : 0));
+            let state: Int = DownloadHandler.queryState(element);
+           
             var dict: Dictionary<String, Any> = [:]
             
             dict["progress"] = progress
@@ -312,7 +289,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             dict["state"] = state
             dict["userId"] = userId
             dict["path"] = path
-            dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
+            dict["speed"] = DownloadHandler.getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
             dict["itemIdentifier"] = itemIdentifier
             dict["fileName"] = fileName
             
@@ -326,7 +303,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let identifier = "download_Identifier_\(userId)"
         if downloadManager == nil {
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+            handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
+            
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             let downloadItems = manager.downloadItems(withStatesArray: [NSNumber(value: BJLDownloadItemState.running.rawValue), NSNumber(value: NSNotFound)]) as! [BJLDownloadItem]
@@ -335,7 +314,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                 element.pause() ///关闭所有下载中的任务
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+            handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
+            
         }
     }
     
@@ -345,6 +326,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
     ) {
         downloadManagerCheck(userId)
         let manager = downloadManager!
+        
         manager.removeDownloadItem(withIdentifier: identifier)
         result(["code": 1, "msg": "删除成功"])
     }
@@ -386,6 +368,99 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         }
         result(dict) ///下载结果
     }
+
+     public func requestToken(withClassID classID: String, sessionID: String?, completion: @escaping (String?, Error?) -> Void) {
+
+            print("requestToken")
+
+            let key = "\(classID)-\(String(describing: sessionID))"
+
+            completion(key, nil)
+
+     }
+
+     public func requestToken(withVideoID videoID: String, completion: @escaping (String?, Error?) -> Void) {
+            completion(videoID, nil)
+     }
     
 }
+
+class DownloadHandler: NSObject {
+    var userId: String?
+    init(userId:String) {
+        super.init()
+        self.userId = userId
+    }
+    
+    
+    public func downloadManager(_ channel: FlutterMethodChannel?,_ downloadManager: BJLDownloadManager, downloadItem: BJLDownloadItem, didChange change: BJLPropertyChange<AnyObject>) {
+        let index = downloadManager.downloadItems.firstIndex(of: downloadItem)
+        if (index == NSNotFound) {
+            return;
+        }
+        let progress = downloadItem.progress.completedUnitCount;
+        let size = downloadItem.totalSize;
+        let file: BJLDownloadFile? = downloadItem.downloadFiles?.first;
+        let fileName: String = file?.fileName ?? "未知文件";
+        let itemIdentifier = downloadItem.itemIdentifier;
+        let path = file?.filePath;
+        ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+        print("rawValue:::::\(downloadItem.state.rawValue)")
+        let state: Int = DownloadHandler.queryState(downloadItem);
+        var dict: Dictionary<String, Any> = [:]
+       
+        dict["progress"] = progress
+        dict["size"] = size
+        dict["path"] = path
+        dict["userId"] = self.userId!
+        dict["itemIdentifier"] = itemIdentifier
+//        _waitingFor_requestDownloadFiles
+        if(state==3){
+            let classID=downloadItem.value(forKey: "_classID") as? String
+            let sessionID=downloadItem.value(forKey: "_sessionID") as? String
+            
+        }
+        dict["state"] = state
+        print("bytesPerSecond:\(downloadItem.bytesPerSecond)  downloadItem.state:\(downloadItem.state.rawValue)")
+        dict["speed"] = DownloadHandler.getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
+        dict["fileName"] = fileName
+        channel?.invokeMethod("notifyChange", arguments: dict)
+    }
+    
+    fileprivate static func queryState(_ item: BJLDownloadItem) -> Int {
+        if(item.state == BJLDownloadItemState.completed&&item.error==nil){
+            return 1 //下载完成
+        }else if((item.state==BJLDownloadItemState.paused&&item.error != nil)||(item.state == BJLDownloadItemState.completed&&item.error != nil)){  ///下载中出错,或者下载文件丢失
+            return  3 ///下载失败
+        }else  if(item.state != BJLDownloadItemState.invalid){
+            return  0 ///下载中
+        }else if(item.state==BJLDownloadItemState.paused){
+            return  2 ///下载暂停
+        }else {
+            return  3 ///下载失败
+        }
+    }
+    
+    fileprivate static func getFileSizeString(size:Float) -> String{
+        let sizeCopy = size
+        if(sizeCopy <= 0){
+            return "0K"
+        }
+        if(sizeCopy >= 1024*1024)//大于1M，则转化成M单位的字符串
+        {
+            return String.init(format: "%1.2fM", sizeCopy / 1024 / 1024)
+        }
+        else if(sizeCopy >= 1024 && sizeCopy<1024*1024) //不到1M,但是超过了1KB，则转化成KB单位
+        {
+            return String.init(format: "%1.2fK",sizeCopy / 1024)
+        }
+        else//剩下的都是小于1K的，则转化成B单位
+        {
+            return String.init(format: "%1.2fB",sizeCopy)
+        }
+    }
+    
+}
+
+
 
