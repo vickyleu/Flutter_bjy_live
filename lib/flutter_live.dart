@@ -136,8 +136,8 @@ class FlutterLive {
       map["roomId"] = classID;
       map["userId"] = userId;
       map["className"] = className;
-      map["courseName"] = className;
-      map["coverImageUrl"] = coverImageUrl;
+      map["courseName"] = courseName;
+      map["classImage"] = coverImageUrl;
       if (code == 2) {
         // final model = await queryDownloadEntity(userId, identifier);
         // insertModel(model);
@@ -195,10 +195,8 @@ class FlutterLive {
   ///查询下载队列任务
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueueForRoomIds(
       String userId, List<String> roomIds) async {
-    final ids = "${roomIds.join(",").toString()}";
-    print("queryDownloadQueueForRoomIds  ids::${ids}");
     final list = (await database.query("BJYDownload",
-            where: "userId= ? and roomId in ( ? )", whereArgs: [userId, ids]))
+            where: "userId= ? and roomId IN (${roomIds.map((e) => "?").join(", ")})", whereArgs: [userId]..addAll( roomIds )))
         .map((map) {
           try {
             return parseModel(map);
@@ -208,8 +206,6 @@ class FlutterLive {
         })
         .skipWhile((value) => value == null)
         .toList();
-    print(
-        "database.rawQuery  millisecondsSinceEpoch::${DateTime.now().millisecondsSinceEpoch}");
     return list;
   }
 
@@ -251,7 +247,7 @@ class FlutterLive {
         path: safeToString(map["path"]),
         className: safeToString(map["className"]),
         courseName: safeToString(map["courseName"]),
-        coverImageUrl: safeToString(map["coverImageUrl"]),
+        coverImageUrl: safeToString(map["classImage"]),
         itemIdentifier: safeToString(map["itemIdentifier"]),
         progress: safeToInt(map["progress"]),
         size: safeToInt(map["size"]),
@@ -265,8 +261,7 @@ class FlutterLive {
       'identifier': identifier,
       'userId': userId,
     });
-    print("Delete a record removeDownloadQueue");
-// Delete a record
+    // Delete a record
     int count=await database.rawDelete(
         'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
         [identifier, userId]);
