@@ -355,10 +355,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         downloadManagerCheck(userId)
         let manager = downloadManager!
         var dict: Dictionary<String, Any> = [:]
-        
+        BJVideoPlayerCore.tokenDelegate = nil
         if manager.validateItem(withClassID: classID, sessionID: "0") { ///可以开始下载
+            
             let item = manager.addDownloadItem(withClassID:classID,sessionID:"0" ,encrypted:true,preferredDefinitionList: nil ) { (item) in
-                item.accessKey = token;
+                item.token = token;
             }
             ///下载结果
             if item == nil {
