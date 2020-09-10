@@ -196,6 +196,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             dict["fileName"] = fileName
             if(item.state == BJLDownloadItemState.completed&&item.error==nil){
                 dict["state"] = 1 //下载完成
+                continue
             }else if((item.state==BJLDownloadItemState.paused&&item.error != nil)||(item.state == BJLDownloadItemState.completed&&item.error != nil)){  ///下载中出错,或者下载文件丢失
                 if pause {
                     dict["state"] = 3
@@ -214,6 +215,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             }else if(item.state==BJLDownloadItemState.paused){
                 if pause {
                     dict["state"] = 2
+                     continue
                 } else {
                     item.resume()
                     dict["state"] = 0
@@ -221,6 +223,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             }else {
                 if pause {
                     dict["state"] = 3
+                     continue
                 } else {
                     item.resume()
                     dict["state"] = 0
@@ -305,7 +308,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
-            
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             let downloadItems = manager.downloadItems(withStatesArray: [NSNumber(value: BJLDownloadItemState.running.rawValue), NSNumber(value: NSNotFound)]) as! [BJLDownloadItem]
@@ -316,7 +318,6 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
-            
         }
     }
     
