@@ -107,11 +107,11 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
             downloadManagerCheck(currentActivity.get(),userId);
-            BJYController.pauseAllDownloadQueue(result,downloadManager,pause);
+            BJYController.pauseAllDownloadQueue(result,downloadManager,pause,userId);
         }else if ("queryDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
             downloadManagerCheck(currentActivity.get(),userId);
-            BJYController.queryDownloadQueue(result,downloadManager);
+            BJYController.queryDownloadQueue(result,downloadManager,userId);
         }else if ("removeDownloadQueue".equals(call.method)) {
             String identifier = call.argument("identifier");
             String userId = call.argument("userId");

@@ -180,10 +180,12 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
         let state: Int = (downloadItem.state == BJLDownloadItemState.completed) ? 1 : ((downloadItem.state == BJLDownloadItemState.invalid) ? 3 : ((downloadItem.state == BJLDownloadItemState.paused) ? 2 : 0));
         var dict: Dictionary<String, Any> = [:]
+        let userId=downloadManager.identifier
         
         dict["progress"] = progress
         dict["size"] = size
         dict["path"] = path
+        dict["userId"] = userId
         dict["itemIdentifier"] = itemIdentifier
         
         dict["state"] = state
@@ -212,6 +214,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             dict["progress"] = progress
             dict["size"] = size
             dict["path"] = path
+            dict["userId"] = userId
             dict["itemIdentifier"] = itemIdentifier
             dict["speed"] = "0K"
             dict["fileName"] = fileName
@@ -307,6 +310,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             dict["progress"] = progress
             dict["size"] = size
             dict["state"] = state
+            dict["userId"] = userId
             dict["path"] = path
             dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: element.bytesPerSecond))
             dict["itemIdentifier"] = itemIdentifier
@@ -367,6 +371,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             } else {
                 dict["code"] = 1
                 dict["msg"] = "开始下载"
+                dict["userId"] = userId
                 dict["size"] = item!.totalSize
                 dict["path"] = item!.downloadFiles?.first?.filePath
                 dict["state"] = 0

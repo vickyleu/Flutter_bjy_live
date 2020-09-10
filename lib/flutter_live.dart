@@ -175,27 +175,29 @@ class FlutterLive {
     }
   }
 
-
   //开始或暂停下载任务队列
-  Future<bool> pauseAllDownload(String userId,bool pause) async {
+  Future<bool> pauseAllDownload(String userId, bool pause) async {
     final dynamic map = await _channel.invokeMethod("pauseAllDownloadQueue", {
       'userId': userId,
       'pause': pause,
     });
     final int code = int.tryParse(map["code"].toString());
     if (code == 1) {
+      mUserId
       try {
-        final stream=Stream.fromFutures((map["data"] as List).map((element) async {
-          final identifier= element["itemIdentifier"];
+        final stream =
+            Stream.fromFutures((map["data"] as List).map((element) async {
+          final identifier = element["itemIdentifier"];
+
           ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
           final model = await queryDownloadEntity(userId, identifier);
-          if(model!=null){
+          if (model != null) {
             model.state = element["state"];
             insertOrUpdateModel(model);
           }
           return model;
         }).toList());
-        await for(var s in stream){
+        await for (var s in stream) {
           print("model::${s.toString()}");
         }
         return true;
@@ -228,7 +230,9 @@ class FlutterLive {
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueueForRoomIds(
       String userId, List<String> roomIds) async {
     final list = (await database.query("BJYDownload",
-            where: "userId= ? and roomId IN (${roomIds.map((e) => "?").join(", ")})", whereArgs: [userId]..addAll( roomIds )))
+            where:
+                "userId= ? and roomId IN (${roomIds.map((e) => "?").join(", ")})",
+            whereArgs: [userId]..addAll(roomIds)))
         .map((map) {
           try {
             return parseModel(map);
@@ -244,7 +248,7 @@ class FlutterLive {
   ///查询单个下载任务
   Future<FlutterLiveDownloadModel> queryDownloadEntity(
       String userId, String itemIdentifier) async {
-    if(userId==null||itemIdentifier==null)return null;
+    if (userId == null || itemIdentifier == null) return null;
     final model = (await database.rawQuery(
             "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
             [userId, itemIdentifier]))
@@ -264,25 +268,27 @@ class FlutterLive {
   ///查询下载队列任务
   Future notifyChange(MethodCall call) async {
     final dynamic map = await call.arguments;
-    if(map is Map){
-      Map<String,dynamic> second={};
-      final keys=map.keys.toList()..sort()..reversed;
+    if (map is Map) {
+      Map<String, dynamic> second = {};
+      final keys = map.keys.toList()
+        ..sort()
+        ..reversed;
       keys.forEach((element) {
-        second[element as String]=map[element as String];
+        second[element as String] = map[element as String];
       });
       print("notifyChange===map:::${second.toString()}");
       String userId = map["userId"];
-      if(userId==null)return;
-      final model =
-      await queryDownloadEntity(userId, map["itemIdentifier"]);
-      mergeModel(model, map);
-      insertOrUpdateModel(model);
-      streamController.sink.add(model);
-      print("streamController.add(model)");
-    }else{
-
-    }
-
+      try {
+        if (userId == null) return;
+        final model = await queryDownloadEntity(userId, map["itemIdentifier"]);
+        mergeModel(model, map);
+        insertOrUpdateModel(model);
+        streamController.sink.add(model);
+        print("streamController.add(model)");
+      } catch (e) {
+        print("streamController.adde.toString()(${e.toString()})");
+      }
+    } else {}
   }
 
   FlutterLiveDownloadModel parseModel(Map map) {
@@ -308,7 +314,7 @@ class FlutterLive {
       'userId': userId,
     });
     // Delete a record
-    int count=await database.rawDelete(
+    int count = await database.rawDelete(
         'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
         [identifier, userId]);
     print("Delete a record count:$count");
@@ -329,8 +335,6 @@ class FlutterLive {
           "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
     });
   }
-
-
 
   Future<void> insertOrUpdateModel(FlutterLiveDownloadModel model) async {
     // Insert some records in a transaction // Update some record

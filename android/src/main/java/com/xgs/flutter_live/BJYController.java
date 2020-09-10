@@ -112,7 +112,7 @@ public class BJYController {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
-                    downloadTask.setDownloadListener(getDownloadListener(channel, result));
+                    downloadTask.setDownloadListener(getDownloadListener(channel, result,userId));
                     downloadTask.start();
                 }, throwable -> {
                     throwable.printStackTrace();
@@ -130,6 +130,7 @@ public class BJYController {
                     Map<String,Object> dict=new HashMap<>();
                     dict.put("progress",progress);
                     dict.put("size",size);
+                    dict.put("userId",userId);
                     dict.put("state",state);
                     dict.put("path",null);
                     dict.put("speed","0K");
@@ -141,7 +142,7 @@ public class BJYController {
     }
 
     @NotNull
-    private static DownloadListener getDownloadListener(MethodChannel channel, MethodChannel.Result result) {
+    private static DownloadListener getDownloadListener(MethodChannel channel, MethodChannel.Result result,String userId) {
         return new DownloadListener() {
             @Override
             public void onStarted(DownloadTask task) {
@@ -156,6 +157,7 @@ public class BJYController {
 
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("code",1);
+                dict.put("userId",userId);
                 dict.put("msg","开始下载");
                 dict.put("speed","0K");
                 dict.put("progress",progress);
@@ -183,6 +185,7 @@ public class BJYController {
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("progress",progress);
                 dict.put("size",size);
+                dict.put("userId",userId);
                 dict.put("state",state);
                 dict.put("path",path);
                 dict.put("speed","0K");
@@ -219,6 +222,7 @@ public class BJYController {
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("progress",progress);
                 dict.put("size",size);
+                dict.put("userId",userId);
                 dict.put("state",state);
                 dict.put("path",path);
                 dict.put("speed","0K");
@@ -243,6 +247,7 @@ public class BJYController {
                 Map<String,Object> dict=new HashMap<>();
                 dict.put("progress",progress);
                 dict.put("size",size);
+                dict.put("userId",userId);
                 dict.put("state",state);
                 dict.put("path",path);
                 dict.put("speed","0K");
@@ -269,6 +274,7 @@ public class BJYController {
                 dict.put("progress",progress);
                 dict.put("size",size);
                 dict.put("state",state);
+                dict.put("userId",userId);
                 dict.put("path",path);
                 dict.put("speed",getFileSizeString(speed));
 
@@ -294,7 +300,7 @@ public class BJYController {
         }
     }
 
-    static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause) {
+    static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
         List<DownloadTask> tasks = downloadManager.getAllTasks();
         List<Map<String,Object>>list=new ArrayList<>();
         for (DownloadTask task:tasks) {
@@ -308,6 +314,7 @@ public class BJYController {
             Map<String,Object> dict=new HashMap<>();
             dict.put("progress",progress);
             dict.put("size",size);
+            dict.put("userId",userId);
             dict.put("path",path);
             dict.put("speed","0K");
             dict.put("itemIdentifier",itemIdentifier);
@@ -360,7 +367,7 @@ public class BJYController {
         }
     }
 
-    static void queryDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager) {
+    static void queryDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,String userId) {
         List<DownloadTask> arr = downloadManager.getAllTasks();
         List<Map<String,Object>> list=new ArrayList<>();
         for (DownloadTask element:arr) {
@@ -378,7 +385,7 @@ public class BJYController {
             dict.put("size",size);
             dict.put("state",state);
             dict.put("path",path);
-
+            dict.put("userId",userId);
             dict.put("itemIdentifier",itemIdentifier);
             dict.put("fileName",fileName);
             dict.put("speed",getFileSizeString(element.getSpeed()));
