@@ -264,14 +264,25 @@ class FlutterLive {
   ///查询下载队列任务
   Future notifyChange(MethodCall call) async {
     final dynamic map = await call.arguments;
-    print("notifyChange===map:::${map.toString()}");
-    String userId = map["userId"];
-    if(userId==null)return;
-    final model =
-        await queryDownloadEntity(userId, map["itemIdentifier"]);
-    mergeModel(model, map);
-    insertOrUpdateModel(model);
-    streamController.add(model);
+    if(map is Map){
+      Map<String,dynamic> second={};
+      final keys=map.keys.toList()..sort()..reversed;
+      keys.forEach((element) {
+        second[element as String]=map[element as String];
+      });
+      print("notifyChange===map:::${second.toString()}");
+      String userId = map["userId"];
+      if(userId==null)return;
+      final model =
+      await queryDownloadEntity(userId, map["itemIdentifier"]);
+      mergeModel(model, map);
+      insertOrUpdateModel(model);
+      streamController.sink.add(model);
+      print("streamController.add(model)");
+    }else{
+
+    }
+
   }
 
   FlutterLiveDownloadModel parseModel(Map map) {
@@ -325,7 +336,7 @@ class FlutterLive {
     // Insert some records in a transaction // Update some record
     await database.transaction((txn) async {
       int id2 = await txn.rawInsert(
-          'INSERT OR REPLACE BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [
             model.roomId,
             model.itemIdentifier,

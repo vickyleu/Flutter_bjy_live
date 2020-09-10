@@ -165,14 +165,13 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         
         
     }
-    
-    
+ 
     public func downloadManager(_ downloadManager: BJLDownloadManager, downloadItem: BJLDownloadItem, didChange change: BJLPropertyChange<AnyObject>) {
         let index = downloadManager.downloadItems.firstIndex(of: downloadItem)
         if (index == NSNotFound) {
             return;
         }
-        let progress = downloadItem.progress.totalUnitCount;
+        let progress = downloadItem.progress.completedUnitCount;
         let size = downloadItem.totalSize;
         let file: BJLDownloadFile? = downloadItem.downloadFiles?.first;
         let fileName: String = file?.fileName ?? "未知文件";
@@ -188,6 +187,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         dict["itemIdentifier"] = itemIdentifier
         
         dict["state"] = state
+        print("bytesPerSecond:\(downloadItem.bytesPerSecond)  downloadItem.state:\(downloadItem.state.rawValue)")
         dict["speed"] = getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
         dict["fileName"] = fileName
         
@@ -202,7 +202,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let downloadItems = manager.downloadItems as [BJLDownloadItem]
         var list:Array<Dictionary<String,Any>> = [];
         for item in downloadItems {
-            let progress = item.progress.totalUnitCount;
+            let progress = item.progress.completedUnitCount;
             let size = item.totalSize;
             let file: BJLDownloadFile? = item.downloadFiles?.first;
             let fileName: String = file?.fileName ?? "未知文件";
@@ -213,7 +213,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
             dict["size"] = size
             dict["path"] = path
             dict["itemIdentifier"] = itemIdentifier
-            dict["speed"] = "0k"
+            dict["speed"] = "0K"
             dict["fileName"] = fileName
             if(item.state != BJLDownloadItemState.invalid && item.state != BJLDownloadItemState.completed){
                 if pause {
@@ -224,9 +224,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
                     dict["state"] = 0
                 }
             }else if(item.state == BJLDownloadItemState.invalid){
-                 dict["state"] = 3
+                dict["state"] = 3
             }else if(item.state == BJLDownloadItemState.completed){
-                 dict["state"] = 1
+                dict["state"] = 1
             }
             list.append(dict);
         }
@@ -266,10 +266,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
     
     
     public func getFileSizeString(size:Float) -> String{
-        var sizeCopy = size
-        
-        if(sizeCopy < 0){
-            sizeCopy=0.0
+        let sizeCopy = size
+        if(sizeCopy <= 0){
+            return "0K"
         }
         if(sizeCopy >= 1024*1024)//大于1M，则转化成M单位的字符串
         {
@@ -295,7 +294,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin, BJLDownloadManager
         let downloadItems = manager.downloadItems
         var arr: Array<Dictionary<String, Any>> = []
         for element in downloadItems {
-            let progress = element.progress.totalUnitCount;
+            let progress = element.progress.completedUnitCount;
             let size = element.totalSize;
             let file: BJLDownloadFile? = element.downloadFiles?.first;
             let fileName: String = file?.fileName ?? "未知文件";
