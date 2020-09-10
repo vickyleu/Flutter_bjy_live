@@ -144,7 +144,7 @@ class FlutterLive {
         // return model;
       } else {
         final model = parseModel(map);
-        insertModel(model);
+        insertOrUpdateModel(model);
         return model;
       }
     }
@@ -165,7 +165,7 @@ class FlutterLive {
         ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
         final model = await queryDownloadEntity(userId, identifier);
         model.state = pause ? 2 : 0;
-        updateModel(model);
+        insertOrUpdateModel(model);
         return true;
       } catch (e) {
         return false;
@@ -191,7 +191,7 @@ class FlutterLive {
           final model = await queryDownloadEntity(userId, identifier);
           if(model!=null){
             model.state = element["state"];
-            updateModel(model);
+            insertOrUpdateModel(model);
           }
           return model;
         }).toList());
@@ -270,7 +270,7 @@ class FlutterLive {
     final model =
         await queryDownloadEntity(userId, map["itemIdentifier"]);
     mergeModel(model, map);
-    updateModel(model);
+    insertOrUpdateModel(model);
     streamController.add(model);
   }
 
@@ -319,11 +319,13 @@ class FlutterLive {
     });
   }
 
-  Future<void> insertModel(FlutterLiveDownloadModel model) async {
-    // Insert some records in a transaction
+
+
+  Future<void> insertOrUpdateModel(FlutterLiveDownloadModel model) async {
+    // Insert some records in a transaction // Update some record
     await database.transaction((txn) async {
       int id2 = await txn.rawInsert(
-          'INSERT INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [
             model.roomId,
             model.itemIdentifier,
@@ -338,20 +340,17 @@ class FlutterLive {
           ]);
       print('inserted2: $id2');
     });
-  }
-
-  Future<void> updateModel(FlutterLiveDownloadModel model) async {
-    // Update some record
-    await database.rawUpdate(
-        "UPDATE  SET BJYDownload(path, state, size, progress) VALUES(?, ?, ?, ?, ?, ?)  WHERE roomId = ? and userId = ?",
-        [
-          model.path,
-          model.state,
-          model.size,
-          model.progress,
-          model.roomId,
-          model.userId
-        ]);
+    //
+    // await database.rawUpdate(
+    //     "UPDATE  SET BJYDownload(path, state, size, progress) VALUES(?, ?, ?, ?, ?, ?)  WHERE roomId = ? and userId = ?",
+    //     [
+    //       model.path,
+    //       model.state,
+    //       model.size,
+    //       model.progress,
+    //       model.roomId,
+    //       model.userId
+    //     ]);
   }
 
   ///查询下载总缓存
