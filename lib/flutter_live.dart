@@ -135,6 +135,7 @@ class FlutterLive {
     if (code == 1 || code == 2) {
       map["roomId"] = classID;
       map["userId"] = userId;
+      map["token"] = token;
       map["className"] = className;
       map["courseName"] = courseName;
       map["classImage"] = coverImageUrl;
@@ -304,6 +305,7 @@ class FlutterLive {
         coverImageUrl: safeToString(map["classImage"]),
         itemIdentifier: safeToString(map["itemIdentifier"]),
         progress: safeToInt(map["progress"]),
+        token: safeToString(map["token"]),
         size: safeToInt(map["size"]),
         state: safeToInt(map["state"]),
         speed: safeToString(map["speed"]));
@@ -329,12 +331,12 @@ class FlutterLive {
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'fltbjydb.db');
-    database = await openDatabase(path, version: 1,
+    database = await openDatabase(path, version: 2,
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
           "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
-          "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER)");
+          "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER,token TEXT)");
     });
   }
 
@@ -342,7 +344,7 @@ class FlutterLive {
     // Insert some records in a transaction // Update some record
     await database.transaction((txn) async {
       int id2 = await txn.rawInsert(
-          'INSERT OR REPLACE INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress,token) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [
             model.roomId,
             model.itemIdentifier,
@@ -353,21 +355,11 @@ class FlutterLive {
             model.coverImageUrl,
             model.state,
             model.size,
-            model.progress
+            model.progress,
+            model.token
           ]);
       print('inserted2: $id2');
     });
-    //
-    // await database.rawUpdate(
-    //     "UPDATE  SET BJYDownload(path, state, size, progress) VALUES(?, ?, ?, ?, ?, ?)  WHERE roomId = ? and userId = ?",
-    //     [
-    //       model.path,
-    //       model.state,
-    //       model.size,
-    //       model.progress,
-    //       model.roomId,
-    //       model.userId
-    //     ]);
   }
 
   ///查询下载总缓存
@@ -396,6 +388,7 @@ class FlutterLiveDownloadModel {
   String coverImageUrl;
   String itemIdentifier;
   int progress;
+  String token;
   int size;
   int state;
   String speed;
@@ -410,7 +403,19 @@ class FlutterLiveDownloadModel {
       this.coverImageUrl,
       this.itemIdentifier,
       this.progress,
+      this.token,
       this.size,
       this.state,
       this.speed});
+
+  @override
+  String toString() {
+    return 'FlutterLiveDownloadModel{roomId: $roomId, fileName: $fileName, userId: $userId, path: $path, className: $className, courseName: $courseName, '
+        'coverImageUrl: $coverImageUrl, itemIdentifier: $itemIdentifier,'
+        ' progress: $progress,'
+        ' token: $token,'
+        ' size: $size, state: $state, speed: $speed}';
+  }
+
+
 }
