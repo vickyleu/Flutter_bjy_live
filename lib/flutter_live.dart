@@ -12,7 +12,6 @@ typedef OnVideoProgressCallback = Function(int, int);
 
 class FlutterLive {
   Database database;
-
   int safeToInt(dynamic field) {
     if (field == null) return 0;
     if (field is int) return field;
@@ -45,8 +44,11 @@ class FlutterLive {
     return _instance;
   }
 
-  StreamController<FlutterLiveDownloadModel> streamController =
+  StreamController<FlutterLiveDownloadModel> _streamController =
       StreamController.broadcast();
+
+
+  List<StreamSink<FlutterLiveDownloadModel>> _bindStreamSinks =List();
 
   FlutterLive._internal() {
     _createDatabase();
@@ -114,7 +116,23 @@ class FlutterLive {
   // 添加下载任务队列
   Future register() async {
     final dynamic map = await _channel.invokeMethod("register", {});
+    _streamController.stream.listen((event) {
+      _bindStreamSinks.forEach((element) {
+        element.add(event);
+      });
+    });
     return;
+  }
+  Future bindSink(StreamSink sink) async {
+    if(!_bindStreamSinks.contains(sink)){
+      _bindStreamSinks.add(sink);
+    }
+  }
+
+  void dispose(StreamSink sink){
+    if(_bindStreamSinks.contains(sink)){
+      _bindStreamSinks.remove(sink);
+    }
   }
 
   // 添加下载任务队列
@@ -285,7 +303,7 @@ class FlutterLive {
           mergeModel(model, map);
           if (model.state == 3) {}
           insertOrUpdateModel(model);
-          streamController.add(model);
+          _streamController.add(model);
           print("streamController.add(${model.toString()})");
         }
       } catch (e) {
