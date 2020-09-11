@@ -7,4 +7,5 @@
 **.last_build_id
 build/
 **pubspec.lock
+**.flutter-plugins
 **.flutter-plugins-dependencies**
