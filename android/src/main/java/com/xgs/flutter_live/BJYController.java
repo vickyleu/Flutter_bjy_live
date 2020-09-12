@@ -16,6 +16,7 @@ import com.baijiayun.groupclassui.InteractiveClassUI;
 import com.baijiayun.livecore.context.LPConstants;
 import com.baijiayun.videoplayer.ui.bean.VideoPlayerConfig;
 import com.baijiayun.videoplayer.ui.playback.PBRoomUI;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -97,13 +98,26 @@ public class BJYController {
         PBRoomUI.enterPBRoom(activity, backOption.getRoomId(), backOption.getToken(), backOption.getSessionId(), playerConfig, s -> Toast.makeText(activity, s, Toast.LENGTH_SHORT).show());
     }
 
+    static void startBJYLocalPlayBack(final Activity activity, BJYBackOption backOption, DownloadManager downloadManager) {
+        VideoPlayerConfig playerConfig=new VideoPlayerConfig();
+        playerConfig.userId=backOption.getUserNum();
+        playerConfig.userName=backOption.getUserName();
+        String identifier=backOption.getIdentifier();
+        final DownloadTask item = downloadManager.getTaskByRoom(Long.parseLong(identifier), 0);
+        if(item==null)return;
+        DownloadModel videoModel=item.getVideoDownloadInfo();
+        DownloadModel signalModel=item.getSignalDownloadInfo();
+        PBRoomUI.enterLocalPBRoom(activity,videoModel, signalModel, playerConfig);
+    }
+
 
     // 跳转到点播
-    static void startBJYPVideo(final Activity activity, BJYVideoOption videoOption) {
+    public  static void startBJYPVideo(final Activity activity, BJYVideoOption videoOption) {
         Intent intent = new Intent(activity, BJYVideoPlayerActivity.class);
         intent.putExtras(videoOption.bundle());
         activity.startActivity(intent);
     }
+
 
     // 开启下载
     static void addingDownloadQueue(Context context, MethodChannel channel,MethodChannel.Result result,DownloadManager downloadManager,
@@ -254,6 +268,12 @@ public class BJYController {
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
+                DownloadModel videoModel=task.getVideoDownloadInfo();
+                DownloadModel signalModel=task.getSignalDownloadInfo();
+
+
+
+                dict.put("videoModel",fileName);
 
                 channel.invokeMethod("notifyChange",  dict);
             }

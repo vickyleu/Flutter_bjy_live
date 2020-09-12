@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.baijiayun.BJYPlayerSDK;
 import com.baijiayun.download.DownloadManager;
 import com.baijiayun.download.DownloadTask;
+import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
+import static com.xgs.flutter_live.BJYController.videoProgressListener;
+
 /**
  * Created  on 2019/10/11.
  *
@@ -36,7 +39,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
     private MethodChannel.Result result;
     private WeakReference<Activity> currentActivity;
     private DownloadManager downloadManager;
-
+    private Gson gson=new Gson();
 
     /** Plugin registration. */
     public static void registerWith(Registrar registrar) {
@@ -56,11 +59,11 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
         teardownChannel();
     }
 
-    private void setupChannel(BinaryMessenger messenger) {
+    public  void setupChannel(BinaryMessenger messenger) {
         methodChannel = new MethodChannel(messenger, CHANNEL_NAME);
         methodChannel.setMethodCallHandler(this);
         // 设置监听
-        BJYController.videoProgressListener = this;
+        videoProgressListener = this;
 
     }
 
@@ -88,6 +91,9 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             return;
         }else if ("startBack".equals(call.method)) {
             BJYController.startBJYPlayBack(currentActivity.get(), new BJYBackOption().create(call));
+            return;
+        }else if ("startLocalBack".equals(call.method)) {
+            BJYController.startBJYLocalPlayBack(currentActivity.get(), new BJYBackOption().create(call),downloadManager);
             return;
         }else if ("startVideo".equals(call.method)) {
             BJYController.startBJYPVideo(currentActivity.get(), new BJYVideoOption().create(call));

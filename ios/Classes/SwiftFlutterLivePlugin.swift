@@ -54,9 +54,18 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let roomId = dic["roomId"] as! String
             let token = dic["token"] as! String
             let sessionId = dic["sessionId"] as! String
-            
-            
-            startBack(roomId: roomId, token: token, sessionId: sessionId)
+            let userName = dic["userName"] as! String
+            let userNum = dic["userNum"] as! String
+            startBack(roomId: roomId, token: token, sessionId: sessionId,userName:userName,userNum:userNum)
+            result(true)
+        } else if (call.method == "startLocalBack") {
+            let dic = call.arguments as! Dictionary<String, Any>
+            //开启回放
+            let userName = dic["userName"] as! String
+            let userNum = dic["userNum"] as! String
+            let userId = dic["userId"] as! String
+            let identifier = dic["identifier"] as! String
+            startBJYLocalPlayBack(userName:userName,userNum:userNum, userId: userId,identifier:identifier)
             
             result(true)
         } else if (call.method == "startVideo") {
@@ -126,12 +135,39 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
     }
     
     
-    public func startBack(roomId: String, token: String, sessionId: String) {
-        
-        
+    public func startBack(roomId: String, token: String, sessionId: String,userName:String,userNum:String) {
         BJVideoPlayerCore.tokenDelegate = nil
+        let options=BJPPlaybackOptions.init()
+        options.userName = userName
+        options.userNumber = Int(userNum) ?? 0
+        let bjpvc =  BJPRoomViewController.onlinePlaybackRoom(withClassID: roomId, sessionID: sessionId, token: token, accessKey: nil, options: options)as! BJPRoomViewController
+        let vc = UIApplication.shared.keyWindow?.rootViewController
         
-        let bjpvc = BJPRoomViewController.onlinePlaybackRoom(withClassID: roomId, sessionID: sessionId, token: token) as! BJPRoomViewController
+        vc?.present(bjpvc, animated: true, completion: nil)
+        
+    }
+    
+    
+    public func startBJYLocalPlayBack(userName:String,userNum:String,userId:String,identifier:String) {
+        BJVideoPlayerCore.tokenDelegate = nil
+        downloadManagerCheck(userId)
+        let manager = downloadManager!
+        let downloadItems = manager.downloadItems as [BJLDownloadItem]
+        var item: BJVDownloadItem?
+        for downloadItem in downloadItems{
+            if(downloadItem.itemIdentifier == identifier){
+                item = downloadItem as! BJVDownloadItem
+                break
+            }
+        }
+        if(item == nil){
+            return
+        }
+        
+        let options=BJPPlaybackOptions.init()
+        options.userName = userName
+        options.userNumber = Int(userNum) ?? 0
+        let bjpvc = BJPRoomViewController.localPlaybackRoom(with: item!, options: options) as! BJPRoomViewController
         
         let vc = UIApplication.shared.keyWindow?.rootViewController
         
@@ -169,7 +205,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         
         
     }
- 
+    
     
     
     public func pauseAllDownloadQueue(userId: String, pause: Bool,
@@ -215,7 +251,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             }else if(item.state==BJLDownloadItemState.paused){
                 if pause {
                     dict["state"] = 2
-                     continue
+                    continue
                 } else {
                     item.resume()
                     dict["state"] = 0
@@ -223,7 +259,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             }else {
                 if pause {
                     dict["state"] = 3
-                     continue
+                    continue
                 } else {
                     item.resume()
                     dict["state"] = 0
@@ -284,7 +320,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let itemIdentifier = element.itemIdentifier;
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
             let state: Int = DownloadHandler.queryState(element);
-           
+            
             var dict: Dictionary<String, Any> = [:]
             
             dict["progress"] = progress
@@ -369,20 +405,20 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         }
         result(dict) ///下载结果
     }
-
-     public func requestToken(withClassID classID: String, sessionID: String?, completion: @escaping (String?, Error?) -> Void) {
-
-            print("requestToken")
-
-            let key = "\(classID)-\(String(describing: sessionID))"
-
-            completion(key, nil)
-
-     }
-
-     public func requestToken(withVideoID videoID: String, completion: @escaping (String?, Error?) -> Void) {
-            completion(videoID, nil)
-     }
+    
+    public func requestToken(withClassID classID: String, sessionID: String?, completion: @escaping (String?, Error?) -> Void) {
+        
+        print("requestToken")
+        
+        let key = "\(classID)-\(String(describing: sessionID))"
+        
+        completion(key, nil)
+        
+    }
+    
+    public func requestToken(withVideoID videoID: String, completion: @escaping (String?, Error?) -> Void) {
+        completion(videoID, nil)
+    }
     
 }
 
@@ -409,13 +445,13 @@ class DownloadHandler: NSObject {
         print("rawValue:::::\(downloadItem.state.rawValue)")
         let state: Int = DownloadHandler.queryState(downloadItem);
         var dict: Dictionary<String, Any> = [:]
-       
+        
         dict["progress"] = progress
         dict["size"] = size
         dict["path"] = path
         dict["userId"] = self.userId!
         dict["itemIdentifier"] = itemIdentifier
-//        _waitingFor_requestDownloadFiles
+        //        _waitingFor_requestDownloadFiles
         if(state==3){
             let classID=downloadItem.value(forKey: "_classID") as? String
             let sessionID=downloadItem.value(forKey: "_sessionID") as? String

@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodCall;
  *
  * @author grey
  */
-class BJYVideoOption {
+public class BJYVideoOption {
 
     private String videoId;
     private String token;

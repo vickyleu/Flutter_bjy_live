@@ -1,5 +1,7 @@
 package com.xgs.flutter_live;
 
+import com.google.gson.Gson;
+
 import javax.annotation.Nonnull;
 
 import io.flutter.plugin.common.MethodCall;
@@ -16,6 +18,7 @@ class BJYLiveOption {
     private String userNum;
     private String sign;
     private String roomId;
+
 
     BJYLiveOption create(@Nonnull MethodCall call) {
         this.userName = call.argument("userName");
@@ -49,5 +52,6 @@ class BJYLiveOption {
             return 0L;
         }
     }
+
 
 }

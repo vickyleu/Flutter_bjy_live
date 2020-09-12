@@ -89,6 +89,14 @@ class FlutterLive {
       'userNum': userNum,
     });
   }
+  void startPlayBackLocalActivity(String userId,String userName, String userNum,String identifier) {
+    _channel.invokeMethod("startLocalBack", {
+      'userId': userId,
+      'userName': userName,
+      'userNum': userNum,
+      'identifier': identifier
+    });
+  }
 
   // 跳转在线点播
   Future<double> startVideoActivity(String userName, String userId,

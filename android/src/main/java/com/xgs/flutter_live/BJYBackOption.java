@@ -1,5 +1,8 @@
 package com.xgs.flutter_live;
 
+import com.baijiayun.download.DownloadModel;
+import com.google.gson.Gson;
+
 import javax.annotation.Nonnull;
 
 import io.flutter.plugin.common.MethodCall;
@@ -10,12 +13,12 @@ import io.flutter.plugin.common.MethodCall;
  * @author grey
  */
 class BJYBackOption {
-
     private String roomId;
     private String token;
     private String sessionId;
     private String userName;
     private String userNum;
+    private String identifier;
 
     BJYBackOption create(@Nonnull MethodCall call) {
         this.roomId = call.argument("roomId");
@@ -23,6 +26,7 @@ class BJYBackOption {
         this.sessionId = call.argument("sessionId");
         this.userName = call.argument("userName");
         this.userNum = call.argument("userNum");
+        this.identifier = call.argument("identifier");
         return this;
     }
 
@@ -44,5 +48,9 @@ class BJYBackOption {
 
     public String getUserNum() {
         return userNum;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 }
