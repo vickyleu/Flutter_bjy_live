@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:collection';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -48,7 +48,7 @@ class FlutterLive {
       StreamController.broadcast();
 
 
-  List<StreamSink<FlutterLiveDownloadModel>> _bindStreamSinks =List();
+  Map<String,StreamSink<FlutterLiveDownloadModel>> _bindStreamSinks =new HashMap();
 
   FlutterLive._internal() {
     _createDatabase();
@@ -125,21 +125,21 @@ class FlutterLive {
   Future register() async {
     final dynamic map = await _channel.invokeMethod("register", {});
     _streamController.stream.listen((event) {
-      _bindStreamSinks.forEach((element) {
+      _bindStreamSinks.values.forEach((element) {
         element.add(event);
       });
     });
     return;
   }
-  Future bindSink(StreamSink sink) async {
-    if(!_bindStreamSinks.contains(sink)){
-      _bindStreamSinks.add(sink);
+  Future bindSink(StreamSink sink,String tag) async {
+    if(!_bindStreamSinks.containsKey(tag)){
+      _bindStreamSinks[tag]=sink;
     }
   }
 
-  void dispose(StreamSink sink){
-    if(_bindStreamSinks.contains(sink)){
-      _bindStreamSinks.remove(sink);
+  void dispose(String tag){
+    if(_bindStreamSinks.containsKey(tag)){
+      _bindStreamSinks.remove(tag);
     }
   }
 
@@ -247,7 +247,7 @@ class FlutterLive {
             return null;
           }
         })
-        .skipWhile((value) => value == null)
+        .where((value) => value != null)
         .toList();
     return list;
   }
@@ -266,7 +266,7 @@ class FlutterLive {
             return null;
           }
         })
-        .skipWhile((value) => value == null)
+        .where((value) => value != null)
         .toList();
     return list;
   }
@@ -285,7 +285,7 @@ class FlutterLive {
             return null;
           }
         })
-        .skipWhile((value) => value == null)
+        .where((value) => value != null)
         .toList()
         .last;
     return model;
@@ -308,10 +308,22 @@ class FlutterLive {
         if (userId == null) return;
         final model = await queryDownloadEntity(userId, map["itemIdentifier"]);
         if (model != null) {
+          final oldState=model.state;
           mergeModel(model, map);
-          if (model.state == 3) {}
-          insertOrUpdateModel(model);
-          _streamController.add(model);
+          if(oldState==model.state&&oldState!=0)return;
+          print("oldState:${oldState}  model.state:${model.state}  roomId:${model.roomId}");
+          ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+          if (model.state == 3) {
+            await Future.delayed(Duration(milliseconds: 400));
+            bool exist= await updateIfExist(model);
+            print("model:${model.toString()} updateIfExist:${exist}");
+            if(exist){
+              model.removeFlag=true;
+            }
+          }else{
+            insertOrUpdateModel(model);
+          }
+          _streamController.sink.add(model);
           print("streamController.add(${model.toString()})");
         }
       } catch (e) {
@@ -339,15 +351,14 @@ class FlutterLive {
 
   ///删除下载队列任务
   Future<void> removeDownloadQueue(String userId, String identifier) async {
+    print("removeDownloadQueue 1");
     final dynamic map = await _channel.invokeMethod("removeDownloadQueue", {
       'identifier': identifier,
       'userId': userId,
     });
-    await database.transaction((txn) async {
-      await txn.execute(
-          'DELETE FROM BJYDownload WHERE itemIdentifier = ? and userId = ?',
-          [identifier, userId]);
-    });
+    print("removeDownloadQueue 2");
+    await database.rawDelete("DELETE FROM  BJYDownload WHERE itemIdentifier = ? and userId = ?",[identifier, userId]);
+    print("removeDownloadQueue 3");
     return;
   }
 
@@ -364,6 +375,25 @@ class FlutterLive {
           "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
           "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER,token TEXT)");
     });
+  }
+
+  Future<bool> updateIfExist(FlutterLiveDownloadModel model) async {
+    await database.execute("INSERT OR REPLACE INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress,token) "
+        " WHERE ("
+        "select exists( select 1  from BJYDownload  where userId= ? and roomId = ? )"
+        ")   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [ model.roomId,
+          model.itemIdentifier,
+          model.userId,
+          model.path,
+          model.className,
+          model.courseName,
+          model.coverImageUrl,
+          model.state,
+          model.size,
+          model.progress,
+          model.token,model.userId,model.roomId]);
+    return Sqflite.firstIntValue(await database.rawQuery("select count(*)  from BJYDownload  where userId= ? and roomId = ?",[model.userId,model.roomId]))==1;
   }
 
   Future<void> insertOrUpdateModel(FlutterLiveDownloadModel model) async {
@@ -418,6 +448,8 @@ class FlutterLiveDownloadModel {
   int size;
   int state;
   String speed;
+
+  bool removeFlag=false;
 
   FlutterLiveDownloadModel(
       {this.roomId,

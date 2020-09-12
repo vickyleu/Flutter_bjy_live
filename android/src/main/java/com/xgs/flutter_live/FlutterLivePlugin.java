@@ -85,18 +85,24 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             new BJYPlayerSDK.Builder(currentActivity.get().getApplication())
                     .setDevelopMode(BuildConfig.DEBUG)
                     .build();
+            result.success(true);
             return;
         }else  if ("startLive".equals(call.method)) {
             BJYController.startLiveActivity(currentActivity.get(), new BJYLiveOption().create(call));
+            result.success(true);
             return;
         }else if ("startBack".equals(call.method)) {
             BJYController.startBJYPlayBack(currentActivity.get(), new BJYBackOption().create(call));
             return;
         }else if ("startLocalBack".equals(call.method)) {
+            String userId = call.argument("userId");
+            downloadManagerCheck(currentActivity.get(),userId);
             BJYController.startBJYLocalPlayBack(currentActivity.get(), new BJYBackOption().create(call),downloadManager);
+            result.success(true);
             return;
         }else if ("startVideo".equals(call.method)) {
             BJYController.startBJYPVideo(currentActivity.get(), new BJYVideoOption().create(call));
+            result.success(true);
         }else if ("addingDownloadQueue".equals(call.method)) {
             String classID = call.argument("classID");
             String userId = call.argument("userId");

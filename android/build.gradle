@@ -2,7 +2,7 @@ group 'com.xgs.flutter_live'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.4.0'
+    ext.kotlin_version = '1.4.10'
     ext.anko_version = '0.10.8'
     repositories {
         google()

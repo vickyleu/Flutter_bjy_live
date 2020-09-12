@@ -65,6 +65,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let userNum = dic["userNum"] as! String
             let userId = dic["userId"] as! String
             let identifier = dic["identifier"] as! String
+            downloadManagerCheck(userId)
             startBJYLocalPlayBack(userName:userName,userNum:userNum, userId: userId,identifier:identifier)
             
             result(true)
@@ -154,12 +155,15 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         let manager = downloadManager!
         let downloadItems = manager.downloadItems as [BJLDownloadItem]
         var item: BJVDownloadItem?
+        print("\(downloadItems)这里的downloadItems是不是有毛病")
         for downloadItem in downloadItems{
+            print("\(downloadItem)这里的downloadItem是不是有毛病")
             if(downloadItem.itemIdentifier == identifier){
                 item = downloadItem as! BJVDownloadItem
                 break
             }
         }
+        print("\(item)这里的item是不是有毛病")
         if(item == nil){
             return
         }
@@ -346,14 +350,22 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             downloadManager!.delegate = self
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
-            let downloadItems = manager.downloadItems(withStatesArray: [NSNumber(value: BJLDownloadItemState.running.rawValue), NSNumber(value: NSNotFound)]) as! [BJLDownloadItem]
-            
-            for element in downloadItems {
-                element.pause() ///关闭所有下载中的任务
+            print("downloadManager!.identifier:\(downloadManager!.identifier)  identifier:\(identifier)")
+            let downloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral: BJLDownloadItemState.running.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
+            if(downloadItems != nil){
+                for element in downloadItems! {
+                    element.pause() ///关闭所有下载中的任务
+                }
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
+            let currentDownloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral:  BJLDownloadItemState.paused.rawValue),NSNumber.init(integerLiteral: BJLDownloadItemState.invalid.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
+            if(currentDownloadItems != nil){
+                for element in currentDownloadItems! {
+                    element.resume() ///启动所有下载中的任务
+                }
+            }
         }
     }
     
