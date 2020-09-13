@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.baijiayun.BJYPlayerSDK;
 import com.baijiayun.download.DownloadManager;
 import com.baijiayun.download.DownloadTask;
+import com.baijiayun.download.constant.TaskStatus;
 import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
@@ -25,6 +26,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
+import static com.xgs.flutter_live.BJYController.bindListener;
 import static com.xgs.flutter_live.BJYController.videoProgressListener;
 
 /**
@@ -39,7 +41,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
     private MethodChannel.Result result;
     private WeakReference<Activity> currentActivity;
     private DownloadManager downloadManager;
-    private Gson gson=new Gson();
+    private String mIdentifier;
 
     /** Plugin registration. */
     public static void registerWith(Registrar registrar) {
@@ -96,7 +98,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             return;
         }else if ("startLocalBack".equals(call.method)) {
             String userId = call.argument("userId");
-            downloadManagerCheck(currentActivity.get(),userId);
+            downloadManagerCheck(currentActivity.get(),userId,result);
             BJYController.startBJYLocalPlayBack(currentActivity.get(), new BJYBackOption().create(call),downloadManager);
             result.success(true);
             return;
@@ -107,44 +109,65 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             String classID = call.argument("classID");
             String userId = call.argument("userId");
             String token = call.argument("token");
-            downloadManagerCheck(currentActivity.get(),userId);
+            downloadManagerCheck(currentActivity.get(),userId, result);
             BJYController.addingDownloadQueue(currentActivity.get(),methodChannel,result,downloadManager,classID,token,userId);
         }else if ("pauseDownloadQueue".equals(call.method)) {
             String identifier = call.argument("identifier");
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
-            downloadManagerCheck(currentActivity.get(),userId);
+            downloadManagerCheck(currentActivity.get(),userId, result);
             BJYController.pauseDownloadQueue(result,downloadManager,identifier,pause);
         }else if ("pauseAllDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
-            downloadManagerCheck(currentActivity.get(),userId);
-            BJYController.pauseAllDownloadQueue(result,downloadManager,pause,userId);
+            downloadManagerCheck(currentActivity.get(),userId, result);
+            BJYController.pauseAllDownloadQueue(methodChannel,result,downloadManager,pause,userId);
         }else if ("queryDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
-            downloadManagerCheck(currentActivity.get(),userId);
+            downloadManagerCheck(currentActivity.get(),userId, result);
             BJYController.queryDownloadQueue(result,downloadManager,userId);
         }else if ("removeDownloadQueue".equals(call.method)) {
             String identifier = call.argument("identifier");
             String userId = call.argument("userId");
-            downloadManagerCheck(currentActivity.get(),userId);
+            downloadManagerCheck(currentActivity.get(),userId, result);
             BJYController.removeDownloadQueue(result,downloadManager,identifier);
         }
     }
 
-     private  void  downloadManagerCheck(Context context,String userId) {
+     private  void  downloadManagerCheck(Context context, String userId, MethodChannel.Result result) {
         String identifier = "download_Identifier_"+userId;
         if (downloadManager == null){
             downloadManager = CustomDownloadService.getDownloadManager(context);
-        } else {
+            //设置缓存文件路径
+            String pathStr = context.getApplicationContext().getFilesDir().getAbsolutePath()+"/download/";
+            downloadManager.setTargetFolder(pathStr);
+            downloadManager.loadDownloadInfo(identifier,true);
+            mIdentifier=identifier;
+            for (DownloadTask task:downloadManager.getAllTasks()) {
+                bindListener(methodChannel, result,userId,task);
+                if(task.getTaskStatus()== TaskStatus.Pause){
+                    task.restart();
+                }
+            }
+        } else if(mIdentifier.equals(identifier)){
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 task.pause(); ///关闭所有下载中的任务
             }
+            //设置缓存文件路径
+            String pathStr = context.getApplicationContext().getFilesDir().getAbsolutePath()+"/download/";
+            downloadManager.setTargetFolder(pathStr);
+            downloadManager.loadDownloadInfo(identifier,true);
+            mIdentifier=identifier;
+            for (DownloadTask task:downloadManager.getAllTasks()) {
+                bindListener(methodChannel, result,userId,task);
+                if(task.getTaskStatus()== TaskStatus.Pause){
+                    task.restart();
+                }
+            }
+
         }
-         //设置缓存文件路径
-         String pathStr = context.getApplicationContext().getFilesDir().getAbsolutePath()+"/download/";
-         downloadManager.setTargetFolder(pathStr);
-         downloadManager.loadDownloadInfo(identifier,true);
+
+
 
     }
 

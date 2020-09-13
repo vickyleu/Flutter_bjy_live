@@ -348,6 +348,13 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
+            let currentDownloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral:  BJLDownloadItemState.paused.rawValue),NSNumber.init(integerLiteral: BJLDownloadItemState.invalid.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
+                        if(currentDownloadItems != nil){
+                            for element in currentDownloadItems! {
+                                element.resume() ///启动所有下载中的任务
+                            }
+                        }
+
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             print("downloadManager!.identifier:\(downloadManager!.identifier)  identifier:\(identifier)")

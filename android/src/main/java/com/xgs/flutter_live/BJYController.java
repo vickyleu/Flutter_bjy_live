@@ -104,7 +104,9 @@ public class BJYController {
         playerConfig.userName=backOption.getUserName();
         String identifier=backOption.getIdentifier();
         final DownloadTask item = downloadManager.getTaskByRoom(Long.parseLong(identifier), 0);
-        if(item==null)return;
+        if(item==null) {
+            return;
+        }
         DownloadModel videoModel=item.getVideoDownloadInfo();
         DownloadModel signalModel=item.getSignalDownloadInfo();
         PBRoomUI.enterLocalPBRoom(activity,videoModel, signalModel, playerConfig);
@@ -126,7 +128,7 @@ public class BJYController {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
-                    downloadTask.setDownloadListener(getDownloadListener(channel, result,userId));
+                    bindListener(channel, result, userId, downloadTask);
                     downloadTask.start();
                 }, throwable -> {
                     throwable.printStackTrace();
@@ -153,6 +155,10 @@ public class BJYController {
 
                     channel.invokeMethod("notifyChange",  dict);
                 }).toString();
+    }
+
+    static void bindListener(MethodChannel channel, MethodChannel.Result result, String userId, DownloadTask downloadTask) {
+        downloadTask.setDownloadListener(getDownloadListener(channel, result, userId));
     }
 
     @NotNull
@@ -320,7 +326,7 @@ public class BJYController {
         }
     }
 
-    static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
+    static void pauseAllDownloadQueue(MethodChannel channel,MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
         List<DownloadTask> tasks = downloadManager.getAllTasks();
         List<Map<String,Object>>list=new ArrayList<>();
         for (DownloadTask task:tasks) {
