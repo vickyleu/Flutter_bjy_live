@@ -428,6 +428,7 @@ public class BJYController {
         );
         Map<String,Object> dict=new HashMap<>();
         if(task!=null){
+            task.setDownloadListener(null);
             downloadManager.deleteTask(task);
             dict.put("code",1);
             dict.put("msg","删除成功");
