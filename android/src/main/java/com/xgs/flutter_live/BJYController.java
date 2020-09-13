@@ -326,7 +326,7 @@ public class BJYController {
         }
     }
 
-    static void pauseAllDownloadQueue(MethodChannel channel,MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
+    static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
         List<DownloadTask> tasks = downloadManager.getAllTasks();
         List<Map<String,Object>>list=new ArrayList<>();
         for (DownloadTask task:tasks) {
@@ -421,7 +421,7 @@ public class BJYController {
         result.success(list);
     }
 
-    static void removeDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,String roomId) {
+    static void removeDownloadQueue(MethodChannel channel, MethodChannel.Result result, DownloadManager downloadManager,String roomId,String userId) {
         DownloadTask task = downloadManager.getTaskByRoom(
                 Long.parseLong(roomId),//roomId
                 0
@@ -433,6 +433,28 @@ public class BJYController {
             dict.put("code",1);
             dict.put("msg","删除成功");
             result.success(dict);
+
+
+            double progress = task.getDownloadedLength();
+            double size = task.getTotalLength();
+            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+            long speed = task.getSpeed();
+            String fileName = task.getVideoFileName();
+            String path = task.getVideoFilePath();
+            DownloadModel info = task.getVideoDownloadInfo();
+            String itemIdentifier = info.roomId+"";
+            ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+            Map<String,Object> dict2=new HashMap<>();
+            dict2.put("progress",progress);
+            dict2.put("size",size);
+            dict2.put("state",3);
+            dict2.put("userId",userId);
+            dict2.put("path",path);
+            dict2.put("speed",getFileSizeString(speed));
+
+            dict2.put("itemIdentifier",itemIdentifier);
+            dict2.put("fileName",fileName);
+            channel.invokeMethod("notifyChange",  dict2);
         }else{
             dict.put("code",0);
             dict.put("msg","删除失败");

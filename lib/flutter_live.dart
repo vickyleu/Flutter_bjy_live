@@ -313,7 +313,7 @@ class FlutterLive {
           if(oldState==model.state&&oldState!=0)return;
           print("oldState:${oldState}  model.state:${model.state}  roomId:${model.roomId}");
           ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-          if (model.state == 3) {
+          if (model.state == 3) { 
             await Future.delayed(Duration(milliseconds: 400));
             bool exist= await updateIfExist(model);
             print("model:${model.toString()} updateIfExist:${exist}");

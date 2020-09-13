@@ -85,7 +85,8 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
         if ("register".equals(call.method)) {
             //配置sdk
             new BJYPlayerSDK.Builder(currentActivity.get().getApplication())
-                    .setDevelopMode(BuildConfig.DEBUG)
+                    .setDevelopMode(false)
+//                    .setDevelopMode(BuildConfig.DEBUG)
                     .build();
             result.success(true);
             return;
@@ -121,7 +122,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
             downloadManagerCheck(currentActivity.get(),userId, result);
-            BJYController.pauseAllDownloadQueue(methodChannel,result,downloadManager,pause,userId);
+            BJYController.pauseAllDownloadQueue(result,downloadManager,pause,userId);
         }else if ("queryDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
             downloadManagerCheck(currentActivity.get(),userId, result);
@@ -130,7 +131,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             String identifier = call.argument("identifier");
             String userId = call.argument("userId");
             downloadManagerCheck(currentActivity.get(),userId, result);
-            BJYController.removeDownloadQueue(result,downloadManager,identifier);
+            BJYController.removeDownloadQueue(methodChannel,result,downloadManager,identifier,userId);
         }
     }
 

@@ -1,33 +1,7 @@
 group 'com.xgs.flutter_live'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    ext.kotlin_version = '1.4.10'
-    ext.anko_version = '0.10.8'
-    repositories {
-        google()
-        jcenter()
-    }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven { url 'https://raw.github.com/baijia/maven/master/' }
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -52,6 +26,37 @@ if (flutterVersionName == null) {
 }
 
 
+buildscript {
+    ext.kotlin_version = '1.4.10'
+    ext.anko_version = '0.10.8'
+    repositories {
+        google()
+        jcenter()
+        maven { url "http://download.flutter.io"}
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.1'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url 'https://raw.github.com/baijia/maven/master/' }
+        maven { url "http://download.flutter.io"}
+    }
+}
+
+
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
 
 
 
@@ -86,6 +91,8 @@ configurations {
 }
 
 dependencies {
+//    compileOnly "io.flutter:flutter_embedding_debug:+"
+
     implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.2.3'
     implementation 'com.baijia.player:VideoplayerUI:2.1.1'
     implementation 'com.baijiayun.live:group-class-ui:1.1.1'
