@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   sqflite: any
   synchronized: any
+  universal_platform: any #通用平台检测,因为谷歌官方屏蔽了web上的dart:io,直接调用Platform.isAndroid之类的方法会报错
   path: any
 
 flutter:

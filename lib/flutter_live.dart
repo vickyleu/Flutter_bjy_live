@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
+
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// Created  on 2019/10/12.
 /// @author grey
@@ -12,6 +14,7 @@ typedef OnVideoProgressCallback = Function(int, int);
 
 class FlutterLive {
   Database database;
+
   int safeToInt(dynamic field) {
     if (field == null) return 0;
     if (field is int) return field;
@@ -45,10 +48,11 @@ class FlutterLive {
   }
 
   StreamController<FlutterLiveDownloadModel> _streamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
 
-  Map<String,StreamSink<FlutterLiveDownloadModel>> _bindStreamSinks =new HashMap();
+  Map<String,
+      StreamSink<FlutterLiveDownloadModel>> _bindStreamSinks = new HashMap();
 
   FlutterLive._internal() {
     _createDatabase();
@@ -58,8 +62,8 @@ class FlutterLive {
   }
 
   Future<dynamic> _methodCallHandler(MethodCall call) async {
-    if (call.method == "video_progress") {
-    } else if (call.method == "notifyChange") {
+    if (call.method == "video_progress") {} else
+    if (call.method == "notifyChange") {
       notifyChange(call);
     }
   }
@@ -89,7 +93,9 @@ class FlutterLive {
       'userNum': userNum,
     });
   }
-  void startPlayBackLocalActivity(String userId,String userName, String userNum,String identifier) {
+
+  void startPlayBackLocalActivity(String userId, String userName,
+      String userNum, String identifier) {
     _channel.invokeMethod("startLocalBack", {
       'userId': userId,
       'userName': userName,
@@ -131,32 +137,33 @@ class FlutterLive {
     });
     return;
   }
-  Future bindSink(StreamSink sink,String tag) async {
-    if(!_bindStreamSinks.containsKey(tag)){
-      _bindStreamSinks[tag]=sink;
+
+  Future bindSink(StreamSink sink, String tag) async {
+    if (!_bindStreamSinks.containsKey(tag)) {
+      _bindStreamSinks[tag] = sink;
     }
   }
 
-  void dispose(String tag){
-    if(_bindStreamSinks.containsKey(tag)){
+  void dispose(String tag) {
+    if (_bindStreamSinks.containsKey(tag)) {
       _bindStreamSinks.remove(tag);
     }
   }
 
   // 添加下载任务队列
-  Future<FlutterLiveDownloadModel> addingDownloadQueue(
-      String classID,
+  Future<FlutterLiveDownloadModel> addingDownloadQueue(String classID,
       String userId,
       String token,
       String courseName,
       String className,
       String coverImageUrl) async {
+    print("addingDownloadQueue ${classID}");
     final dynamic map = await _channel.invokeMethod("addingDownloadQueue", {
       'classID': classID,
       'userId': userId,
       'token': token,
     });
-    print("_channel.invokeMethod(addingDownloadQueue)===${map.toString()}");
+    print("addingDownloadQueue===${map.toString()}");
     final int code = int.tryParse(map["code"].toString());
     if (code == 1 || code == 2) {
       map["roomId"] = classID;
@@ -179,8 +186,8 @@ class FlutterLive {
   }
 
   //开始或暂停下载任务队列
-  Future<bool> pauseDownloadQueue(
-      String userId, String identifier, bool pause) async {
+  Future<bool> pauseDownloadQueue(String userId, String identifier,
+      bool pause) async {
     final dynamic map = await _channel.invokeMethod("pauseDownloadQueue", {
       'identifier': identifier,
       'userId': userId,
@@ -212,7 +219,7 @@ class FlutterLive {
     if (code == 1) {
       try {
         final stream =
-            Stream.fromFutures((map["data"] as List).map((element) async {
+        Stream.fromFutures((map["data"] as List).map((element) async {
           final identifier = element["itemIdentifier"];
 
           ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
@@ -239,14 +246,14 @@ class FlutterLive {
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueue(
       String userId) async {
     final list = (await database
-            .rawQuery("SELECT * FROM BJYDownload where userId= ? ", [userId]))
+        .rawQuery("SELECT * FROM BJYDownload where userId= ? ", [userId]))
         .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
+      try {
+        return parseModel(map);
+      } catch (e) {
+        return null;
+      }
+    })
         .where((value) => value != null)
         .toList();
     return list;
@@ -256,39 +263,44 @@ class FlutterLive {
   Future<List<FlutterLiveDownloadModel>> queryDownloadQueueForRoomIds(
       String userId, List<String> roomIds) async {
     final list = (await database.query("BJYDownload",
-            where:
-                "userId= ? and roomId IN (${roomIds.map((e) => "?").join(", ")})",
-            whereArgs: [userId]..addAll(roomIds)))
+        where:
+        "userId= ? and roomId IN (${roomIds.map((e) => "?").join(", ")})",
+        whereArgs: [userId]..addAll(roomIds)))
         .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
+      try {
+        return parseModel(map);
+      } catch (e) {
+        return null;
+      }
+    })
         .where((value) => value != null)
         .toList();
     return list;
   }
 
   ///查询单个下载任务
-  Future<FlutterLiveDownloadModel> queryDownloadEntity(
-      String userId, String itemIdentifier) async {
+  Future<FlutterLiveDownloadModel> queryDownloadEntity(String userId,
+      String itemIdentifier) async {
     if (userId == null || itemIdentifier == null) return null;
-    final model = (await database.rawQuery(
-            "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
-            [userId, itemIdentifier]))
-        .map((map) {
-          try {
-            return parseModel(map);
-          } catch (e) {
-            return null;
-          }
-        })
-        .where((value) => value != null)
-        .toList()
-        .last;
-    return model;
+    try {
+      final list = (await database.rawQuery(
+          "SELECT * FROM BJYDownload where userId= ? and  itemIdentifier= ? ",
+          [userId, itemIdentifier]))
+          .map((map) {
+        try {
+          return parseModel(map);
+        } catch (e) {
+          return null;
+        }
+      })
+          .where((value) => value != null)
+          .toList();
+      final model = list.isNotEmpty ? list.last : null;
+      return model;
+    } catch (e) {
+      print("queryDownloadEntity   ${e.toString()}");
+      return null;
+    }
   }
 
   ///查询下载队列任务
@@ -308,26 +320,53 @@ class FlutterLive {
         if (userId == null) return;
         final model = await queryDownloadEntity(userId, map["itemIdentifier"]);
         if (model != null) {
-          final oldState=model.state;
+          final oldState = model.state;
           mergeModel(model, map);
-          if(oldState==model.state&&oldState!=0)return;
-          print("oldState:${oldState}  model.state:${model.state}  roomId:${model.roomId}");
+          if (oldState == model.state && oldState != 0){
+              return;
+          }
           ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-          if (model.state == 3) { 
+          if (model.state == 3&&oldState!=0) {
             await Future.delayed(Duration(milliseconds: 400));
-            bool exist= await updateIfExist(model);
+            bool exist = await updateIfExist(model);
             print("model:${model.toString()} updateIfExist:${exist}");
-            if(exist){
-              model.removeFlag=true;
+            if (exist) {
+              model.removeFlag = true;
             }
-          }else{
+          } else {
             insertOrUpdateModel(model);
           }
           _streamController.sink.add(model);
           print("streamController.add(${model.toString()})");
+        } else {
+          final model = parseModel(map);
+          if(model.state==1){//&&model.token!=null&&model.token.isNotEmpty
+            insertOrUpdateModel(model);
+            _streamController.sink.add(model);
+            print("streamController.addinsertOrUpdateModel(${model.toString()})");
+          }
         }
       } catch (e) {
-        print("streamController.adde.toString()(${e.toString()})");
+        final error = e?.toString() ?? "";
+        if (error.length < 1000) {
+          print("streamController.adde.toString()(${error})");
+        } else {
+          List<String>l = List();
+          var str = error;
+          while (str.length >= 1000) {
+            l.add(str.substring(0, 1000));
+            str = str.substring(1000, str.length);
+          }
+          for (int i = 0; i < l.length; i++) {
+            if (i == 0) {
+              print("streamController.adde.toString()(${l[i]}");
+            } else if (i == l.length - 1) {
+              print("${l[i]})");
+            } else {
+              print("${l[i]}");
+            }
+          }
+        }
       }
     } else {}
   }
@@ -357,7 +396,9 @@ class FlutterLive {
       'userId': userId,
     });
     print("removeDownloadQueue 2");
-    await database.rawDelete("DELETE FROM  BJYDownload WHERE itemIdentifier = ? and userId = ?",[identifier, userId]);
+    await database.rawDelete(
+        "DELETE FROM  BJYDownload WHERE itemIdentifier = ? and userId = ?",
+        [identifier, userId]);
     print("removeDownloadQueue 3");
     return;
   }
@@ -370,30 +411,22 @@ class FlutterLive {
     String path = join(databasesPath, 'fltbjydb.db');
     database = await openDatabase(path, version: 2,
         onCreate: (Database db, int version) async {
-      // When creating the db, create the table
-      await db.execute(
-          "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
-          "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER,token TEXT)");
-    });
+          // When creating the db, create the table
+          await db.execute(
+              "CREATE TABLE BJYDownload (roomId INTEGER PRIMARY KEY, itemIdentifier TEXT,userId TEXT, path TEXT, className TEXT,courseName TEXT, "
+                  "classImage TEXT, state INTEGER, size INTEGER, progress INTEGER,token TEXT)");
+        });
   }
 
   Future<bool> updateIfExist(FlutterLiveDownloadModel model) async {
-    await database.execute("INSERT OR REPLACE INTO BJYDownload(roomId, itemIdentifier,userId, path, className,courseName, classImage, state, size, progress,token) "
-        " WHERE ("
-        "select exists( select 1  from BJYDownload  where userId= ? and roomId = ? )"
-        ")   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [ model.roomId,
-          model.itemIdentifier,
-          model.userId,
-          model.path,
-          model.className,
-          model.courseName,
-          model.coverImageUrl,
+    int count=Sqflite.firstIntValue(await database.rawQuery(
+        "UPDATE BJYDownload SET  path = ?, state = ?, size = ? , progress = ?   WHERE userId= ? and roomId = ?",
+        [model.path,
           model.state,
           model.size,
-          model.progress,
-          model.token,model.userId,model.roomId]);
-    return Sqflite.firstIntValue(await database.rawQuery("select count(*)  from BJYDownload  where userId= ? and roomId = ?",[model.userId,model.roomId]))==1;
+          model.progress, model.userId, model.roomId]) )??0;
+    print("countcountcount::${count}");
+    return count ==1;
   }
 
   Future<void> insertOrUpdateModel(FlutterLiveDownloadModel model) async {
@@ -449,22 +482,21 @@ class FlutterLiveDownloadModel {
   int state;
   String speed;
 
-  bool removeFlag=false;
+  bool removeFlag = false;
 
-  FlutterLiveDownloadModel(
-      {this.roomId,
-      this.fileName,
-      this.userId,
-      this.path,
-      this.className,
-      this.courseName,
-      this.coverImageUrl,
-      this.itemIdentifier,
-      this.progress,
-      this.token,
-      this.size,
-      this.state,
-      this.speed});
+  FlutterLiveDownloadModel({this.roomId,
+    this.fileName,
+    this.userId,
+    this.path,
+    this.className,
+    this.courseName,
+    this.coverImageUrl,
+    this.itemIdentifier,
+    this.progress,
+    this.token,
+    this.size,
+    this.state,
+    this.speed});
 
   @override
   String toString() {

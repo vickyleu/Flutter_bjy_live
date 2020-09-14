@@ -31,7 +31,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         
         if (call.method == "register") {
             let dic = call.arguments as! Dictionary<String, Any>
-            result(true)
+            do {
+                try  result(true)
+            } catch  {
+            }
+            
         }else  if (call.method == "startLive") {
             
             let dic = call.arguments as! Dictionary<String, Any>
@@ -44,8 +48,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let roomId = dic["roomId"] as! String
             
             startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId)
-            
-            result(true)
+            do {
+                try  result(true)
+            } catch  {
+            }
         } else if (call.method == "startBack") {
             
             let dic = call.arguments as! Dictionary<String, Any>
@@ -57,7 +63,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let userName = dic["userName"] as! String
             let userNum = dic["userNum"] as! String
             startBack(roomId: roomId, token: token, sessionId: sessionId,userName:userName,userNum:userNum)
-            result(true)
+            do {
+                try  result(true)
+            } catch  {
+            }
         } else if (call.method == "startLocalBack") {
             let dic = call.arguments as! Dictionary<String, Any>
             //开启回放
@@ -67,8 +76,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let identifier = dic["identifier"] as! String
             downloadManagerCheck(userId)
             startBJYLocalPlayBack(userName:userName,userNum:userNum, userId: userId,identifier:identifier)
-            
-            result(true)
+            do {
+                try  result(true)
+            } catch  {
+            }
         } else if (call.method == "startVideo") {
             
             let dic = call.arguments as! Dictionary<String, Any>
@@ -192,11 +203,14 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         
         
         bjpvc.progress = { (current, duration) in
+            do {
+                try  result([
+                    "progress": current,
+                    "totalProgress": duration
+                ])
+            } catch  {
+            }
             
-            result([
-                "progress": current,
-                "totalProgress": duration
-            ])
         }
         
         
@@ -273,9 +287,17 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             list.append(dict);
         }
         if pause {
-            result(["code": 1, "msg": "暂停成功", "data": list])
+            do {
+                try   result(["code": 1, "msg": "暂停成功", "data": list])
+            } catch  {
+            }
+            
         } else {
-            result(["code": 1, "msg": "恢复成功", "data": list])
+            do {
+                try    result(["code": 1, "msg": "恢复成功", "data": list])
+            } catch  {
+            }
+            
         }
     }
     
@@ -290,18 +312,34 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             if item.itemIdentifier == identifier {
                 if pause {
                     item.pause()
-                    result(["code": 1, "msg": "暂停成功"])
+                    do {
+                        try    result(["code": 1, "msg": "暂停成功"])
+                    } catch  {
+                    }
+                    
                 } else {
                     item.resume()
-                    result(["code": 1, "msg": "恢复成功"])
+                    do {
+                        try   result(["code": 1, "msg": "恢复成功"])
+                    } catch  {
+                    }
+                    
                 }
                 return
             }
         }
         if pause {
-            result(["code": 0, "msg": "暂停失败"])
+            do {
+                try     result(["code": 0, "msg": "暂停失败"])
+            } catch  {
+            }
+            
         } else {
-            result(["code": 0, "msg": "恢复失败"])
+            do {
+                try       result(["code": 0, "msg": "恢复失败"])
+            } catch  {
+            }
+            
         }
     }
     
@@ -338,7 +376,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             
             arr.append(dict)
         }
-        result(arr) ///查询到的所有下载项
+        do {
+            try     result(arr) ///查询到的所有下载项
+        } catch  {
+        }
+        
     }
     
     
@@ -349,12 +391,12 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
             let currentDownloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral:  BJLDownloadItemState.paused.rawValue),NSNumber.init(integerLiteral: BJLDownloadItemState.invalid.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
-                        if(currentDownloadItems != nil){
-                            for element in currentDownloadItems! {
-                                element.resume() ///启动所有下载中的任务
-                            }
-                        }
-
+            if(currentDownloadItems != nil){
+                for element in currentDownloadItems! {
+                    element.resume() ///启动所有下载中的任务
+                }
+            }
+            
         } else if downloadManager!.identifier != identifier {
             let manager = downloadManager!
             print("downloadManager!.identifier:\(downloadManager!.identifier)  identifier:\(identifier)")
@@ -384,7 +426,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         let manager = downloadManager!
         
         manager.removeDownloadItem(withIdentifier: identifier)
-        result(["code": 1, "msg": "删除成功"])
+        do {
+            try     result(["code": 1, "msg": "删除成功"])
+        } catch  {
+        }
+        
     }
     
     public func addingDownloadQueue(
@@ -422,7 +468,10 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             dict["code"] = 2
             dict["msg"] = "文件已下载或正在下载中"
         }
-        result(dict) ///下载结果
+        do {
+            try     result(dict)///下载结果
+        } catch  {
+        }
     }
     
     public func requestToken(withClassID classID: String, sessionID: String?, completion: @escaping (String?, Error?) -> Void) {
@@ -480,7 +529,11 @@ class DownloadHandler: NSObject {
         print("bytesPerSecond:\(downloadItem.bytesPerSecond)  downloadItem.state:\(downloadItem.state.rawValue)")
         dict["speed"] = DownloadHandler.getFileSizeString(size: Float.init(integerLiteral: downloadItem.bytesPerSecond))
         dict["fileName"] = fileName
-        channel?.invokeMethod("notifyChange", arguments: dict)
+        do {
+            try  channel?.invokeMethod("notifyChange", arguments: dict)
+        } catch  {
+        }
+        
     }
     
     fileprivate static func queryState(_ item: BJLDownloadItem) -> Int {

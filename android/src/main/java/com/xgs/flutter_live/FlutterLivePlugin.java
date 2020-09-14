@@ -168,6 +168,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
 
         }
 
+         downloadManager.loadDownloadInfo(identifier,true);
 
 
     }

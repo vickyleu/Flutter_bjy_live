@@ -3,6 +3,7 @@ package com.xgs.flutter_live;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,11 +21,14 @@ import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -127,33 +131,35 @@ public class BJYController {
         downloadManager.newPlaybackDownloadTask(userId, Long.parseLong(roomId), 0,token, "回放下载")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
+                    Log.e("result","subscribe:"+downloadTask);
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
                     bindListener(channel, result, userId, downloadTask);
-                    downloadTask.start();
+                    downloadTask.restart();
                 }, throwable -> {
                     throwable.printStackTrace();
-
+                    Log.e("result","throwable:"+throwable);
                     Map<String,Object> dict1=new HashMap<>();
                     dict1.put("code",0);
                     dict1.put("msg","下载失败");
                     try {
                         result.success(dict1);
                     }catch (Exception ignored){}
-                    double progress = 0;
-                    double size = 0;
-                    ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-                    int state =3;
-                    Map<String,Object> dict=new HashMap<>();
-                    dict.put("progress",progress);
-                    dict.put("size",size);
-                    dict.put("userId",userId);
-                    dict.put("state",state);
-                    dict.put("path",null);
-                    dict.put("speed","0K");
-                    dict.put("itemIdentifier",roomId);
-                    dict.put("fileName",null);
-
-                    channel.invokeMethod("notifyChange",  dict);
+//                    double progress = 0;
+//                    double size = 0;
+//                    ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+//                    int state =3;
+//                    Map<String,Object> dict=new HashMap<>();
+//                    dict.put("progress",progress);
+//                    dict.put("size",size);
+//                    dict.put("userId",userId);
+//                    dict.put("state",state);
+//                    dict.put("path",null);
+//                    dict.put("speed","0K");
+//                    dict.put("itemIdentifier",roomId);
+//                    dict.put("fileName",null);
+//                    try {
+//                        channel.invokeMethod("notifyChange",  dict);
+//                    }catch (Exception e){}
                 }).toString();
     }
 
@@ -187,32 +193,40 @@ public class BJYController {
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                result.success(dict);
+                try {
+                    result.success(dict);
+                }catch (Exception e){}
             }
 
             @Override
             public void onPaused(DownloadTask task) {
                 Log.e("视频下载","视频下载onPaused ====================");
-                double progress = task.getDownloadedLength();
-                double size = task.getTotalLength();
-                Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
-                String fileName = task.getVideoFileName();
-                String path = task.getVideoFilePath();
-                DownloadModel info = task.getVideoDownloadInfo();
-                String itemIdentifier = info.roomId+"";
-                ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-                int state =2;
-                Map<String,Object> dict=new HashMap<>();
-                dict.put("progress",progress);
-                dict.put("size",size);
-                dict.put("userId",userId);
-                dict.put("state",state);
-                dict.put("path",path);
-                dict.put("speed","0K");
+//                double progress = task.getDownloadedLength();
+//                double size = task.getTotalLength();
+//                int p=( (int) (progress * 100 / size));
+//                Log.e("视频下载","视频下载onPaused onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+//                String fileName = task.getVideoFileName();
+//                String path = task.getVideoFilePath();
+//                DownloadModel info = task.getVideoDownloadInfo();
+//                String itemIdentifier = info.roomId+"";
+//                Log.e("getTaskStatus",task.getTaskStatus().name());
+//
+//                ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
+//                int state =task.getTaskStatus()==TaskStatus.Finish?3:2;
+//                Map<String,Object> dict=new HashMap<>();
+//                dict.put("progress",progress);
+//                dict.put("size",size);
+//                dict.put("userId",userId);
+//                dict.put("state",state);
+//                dict.put("path",path);
+//                dict.put("speed","0K");
+//
+//                dict.put("itemIdentifier",itemIdentifier);
+//                dict.put("fileName",fileName);
+//                try {
+//                    channel.invokeMethod("notifyChange",  dict);
+//                }catch (Exception e){}
 
-                dict.put("itemIdentifier",itemIdentifier);
-                dict.put("fileName",fileName);
-                channel.invokeMethod("notifyChange",  dict);
             }
 
             @Override
@@ -232,7 +246,7 @@ public class BJYController {
                 }catch (Exception ignored){}
                 double progress = task.getDownloadedLength();
                 double size = task.getTotalLength();
-                Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                Log.e("视频下载","视频下载onError onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 String fileName = task.getVideoFileName();
                 String path = task.getVideoFilePath();
                 DownloadModel info = task.getVideoDownloadInfo();
@@ -249,7 +263,9 @@ public class BJYController {
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                channel.invokeMethod("notifyChange",  dict);
+                try {
+                    channel.invokeMethod("notifyChange",  dict);
+                }catch (Exception e){}
             }
 
             @Override
@@ -257,7 +273,7 @@ public class BJYController {
                 Log.e("视频下载","视频下载onFinish ===========videoFilePath："+task.getVideoFilePath());
                 double progress = task.getDownloadedLength();
                 double size = task.getTotalLength();
-                Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                Log.e("视频下载","视频下载onFinish onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 String fileName = task.getVideoFileName();
                 DownloadModel info = task.getVideoDownloadInfo();
                 String itemIdentifier = info.roomId+"";
@@ -280,15 +296,16 @@ public class BJYController {
 
 
                 dict.put("videoModel",fileName);
-
-                channel.invokeMethod("notifyChange",  dict);
+                try {
+                    channel.invokeMethod("notifyChange",  dict);
+                }catch (Exception e){}
             }
 
             @Override
             public void onProgress(DownloadTask task) {
                 double progress = task.getDownloadedLength();
                 double size = task.getTotalLength();
-                Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
+                Log.e("视频下载","视频下载 onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
                 long speed = task.getSpeed();
                 String fileName = task.getVideoFileName();
                 String path = task.getVideoFilePath();
@@ -306,7 +323,9 @@ public class BJYController {
 
                 dict.put("itemIdentifier",itemIdentifier);
                 dict.put("fileName",fileName);
-                channel.invokeMethod("notifyChange",  dict);
+                try {
+                    channel.invokeMethod("notifyChange",  dict);
+                }catch (Exception e){}
             }
         };
     }
@@ -350,7 +369,7 @@ public class BJYController {
                     task.pause();
                     dict.put("state",2);
                 } else {
-                    task.restart();
+                    task.start();
                     dict.put("state",0);
                 }
             }else if(task.getTaskStatus()==TaskStatus.Error){
@@ -366,12 +385,16 @@ public class BJYController {
             dict.put("code",1);
             dict.put("msg","暂停成功");
             dict.put("data",list);
-            result.success(dict);
+            try {
+                result.success(dict);
+            }catch (Exception e){}
         }else {
             dict.put("code",1);
             dict.put("msg","恢复成功");
             dict.put("data",list);
-            result.success(dict);
+            try {
+                result.success(dict);
+            }catch (Exception e){}
         }
     }
     static void pauseDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager, String roomId, boolean pause) {
@@ -384,12 +407,16 @@ public class BJYController {
             task.pause();
             dict.put("code",1);
             dict.put("msg","暂停成功");
-            result.success(dict);
+            try {
+                result.success(dict);
+            }catch (Exception e){}
         }else {
-            task.restart();
+            task.start();
             dict.put("code",1);
             dict.put("msg","恢复成功");
-            result.success(dict);
+            try {
+                result.success(dict);
+            }catch (Exception e){}
         }
     }
 
@@ -418,7 +445,9 @@ public class BJYController {
 
             list.add(dict);
         }
-        result.success(list);
+        try {
+            result.success(list);
+        }catch (Exception e){}
     }
 
     static void removeDownloadQueue(MethodChannel channel, MethodChannel.Result result, DownloadManager downloadManager,String roomId,String userId) {
@@ -426,39 +455,49 @@ public class BJYController {
                 Long.parseLong(roomId),//roomId
                 0
         );
-        Map<String,Object> dict=new HashMap<>();
+        Map<String,Object> dict_=new HashMap<>();
         if(task!=null){
-            task.setDownloadListener(null);
-            downloadManager.deleteTask(task);
-            dict.put("code",1);
-            dict.put("msg","删除成功");
-            result.success(dict);
-
-
             double progress = task.getDownloadedLength();
             double size = task.getTotalLength();
-            Log.e("视频下载","视频下载onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
-            long speed = task.getSpeed();
+            Log.e("视频下载","视频下载 onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
             String fileName = task.getVideoFileName();
             String path = task.getVideoFilePath();
             DownloadModel info = task.getVideoDownloadInfo();
             String itemIdentifier = info.roomId+"";
             ///0 是下载中,1是下载完成,2是下载暂停,3是下载失败
-            Map<String,Object> dict2=new HashMap<>();
-            dict2.put("progress",progress);
-            dict2.put("size",size);
-            dict2.put("state",3);
-            dict2.put("userId",userId);
-            dict2.put("path",path);
-            dict2.put("speed",getFileSizeString(speed));
+            int state = 3;//此状态为删除,因为sdk onDelete回调不调用,会延时300ms查询数据库是否还存在
+            Map<String,Object> dict=new HashMap<>();
+            dict.put("progress",progress);
+            dict.put("size",size);
+            dict.put("state",state);
+            dict.put("userId",userId);
+            dict.put("path",path);
+            dict.put("speed","0K");
 
-            dict2.put("itemIdentifier",itemIdentifier);
-            dict2.put("fileName",fileName);
-            channel.invokeMethod("notifyChange",  dict2);
+            dict.put("itemIdentifier",itemIdentifier);
+            dict.put("fileName",fileName);
+
+            downloadManager.deleteTask(task);
+            dict_.put("code",1);
+            dict_.put("msg","删除成功");
+            try {
+                result.success(dict_);
+            }catch (Exception e){}
+
+
+            try {
+                channel.invokeMethod("notifyChange",  dict);
+            }catch (Exception e){}
+
+
+
+
         }else{
-            dict.put("code",0);
-            dict.put("msg","删除失败");
-            result.success(dict);
+            dict_.put("code",0);
+            dict_.put("msg","删除失败");
+            try {
+                result.success(dict_);
+            }catch (Exception e){}
         }
     }
 
