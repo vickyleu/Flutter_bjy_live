@@ -147,10 +147,10 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 bindListener(methodChannel, result,userId,task);
                 if(task.getTaskStatus()== TaskStatus.Pause){
-                    task.restart();
+                    task.start();
                 }
             }
-        } else if(mIdentifier.equals(identifier)){
+        } else if(!mIdentifier.equals(identifier)){
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 task.pause(); ///关闭所有下载中的任务
             }
@@ -162,7 +162,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 bindListener(methodChannel, result,userId,task);
                 if(task.getTaskStatus()== TaskStatus.Pause){
-                    task.restart();
+                    task.start();
                 }
             }
 

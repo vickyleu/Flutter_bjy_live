@@ -133,13 +133,13 @@ public class BJYController {
         downloadManager.newPlaybackDownloadTask(userId, Long.parseLong(roomId), 0,token, "回放下载")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
-                    Log.e(BJYLOG,"subscribe:"+Long.parseLong(roomId));
+//                    Log.e(BJYLOG,"subscribe:"+Long.parseLong(roomId));
                     Log.e("result","subscribe:"+downloadTask);
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
                     bindListener(channel, result, userId, downloadTask);
-                    downloadTask.restart();
+                    downloadTask.start();
                 }, throwable -> {
-                    Log.e(BJYLOG,"throwable:"+Long.parseLong(roomId));
+//                    Log.e(BJYLOG,"throwable:"+Long.parseLong(roomId));
                     throwable.printStackTrace();
                     Log.e("result","throwable:"+throwable);
                     Map<String,Object> dict1=new HashMap<>();
@@ -311,7 +311,7 @@ public class BJYController {
 
             @Override
             public void onProgress(DownloadTask task) {
-                Log.e(BJYLOG,"onProgress:"+task.getVideoDownloadInfo().roomId);
+//                Log.e(BJYLOG,"onProgress:"+task.getVideoDownloadInfo().roomId);
                 double progress = task.getDownloadedLength();
                 double size = task.getTotalLength();
                 Log.e("视频下载","视频下载 onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
@@ -355,7 +355,7 @@ public class BJYController {
     }
 
     static void pauseAllDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager,boolean pause,String userId) {
-        Log.e(BJYLOG,"pauseAllDownloadQueue:");
+//        Log.e(BJYLOG,"pauseAllDownloadQueue:");
         List<DownloadTask> tasks = downloadManager.getAllTasks();
         List<Map<String,Object>>list=new ArrayList<>();
         for (DownloadTask task:tasks) {
@@ -468,8 +468,10 @@ public class BJYController {
                 Long.parseLong(roomId),//roomId
                 0
         );
+        Log.e(BJYLOG,"getTaskByRoom:"+roomId +"  task:"+task);
         Map<String,Object> dict_=new HashMap<>();
         if(task!=null){
+
             double progress = task.getDownloadedLength();
             double size = task.getTotalLength();
             Log.e("视频下载","视频下载 onProgress==="+task.getVideoFileName()+"--->"+( (int) (progress * 100 / size))+" %");
@@ -489,8 +491,42 @@ public class BJYController {
 
             dict.put("itemIdentifier",itemIdentifier);
             dict.put("fileName",fileName);
+            task.setDownloadListener(new DownloadListener() {
+                @Override
+                public void onProgress(DownloadTask downloadTask) {
 
+                }
+
+                @Override
+                public void onError(DownloadTask downloadTask, HttpException e) {
+
+                }
+
+                @Override
+                public void onPaused(DownloadTask downloadTask) {
+
+                }
+
+                @Override
+                public void onStarted(DownloadTask downloadTask) {
+
+                }
+
+                @Override
+                public void onFinish(DownloadTask downloadTask) {
+
+                }
+
+                @Override
+                public void onDeleted(DownloadTask downloadTask) {
+
+                }
+            });
             downloadManager.deleteTask(task);
+            task.pause();
+            task.deleteFiles();
+
+            Log.e(BJYLOG,"deleteTask:"+roomId);
             dict_.put("code",1);
             dict_.put("msg","删除成功");
             try {
