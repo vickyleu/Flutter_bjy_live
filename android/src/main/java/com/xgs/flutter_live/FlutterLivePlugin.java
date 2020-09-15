@@ -29,6 +29,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import static com.xgs.flutter_live.BJYController.BJYLOG;
 import static com.xgs.flutter_live.BJYController.bindListener;
+import static com.xgs.flutter_live.BJYController.pauseTask;
 import static com.xgs.flutter_live.BJYController.videoProgressListener;
 
 /**
@@ -157,7 +158,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
         } else if(!mIdentifier.equals(identifier)){
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 task.setDownloadListener(null);
-                task.pause(); ///关闭所有下载中的任务
+                pauseTask(task);///关闭所有下载中的任务
             }
             //设置缓存文件路径
             String pathStr = context.getApplicationContext().getFilesDir().getAbsolutePath()+"/download/";

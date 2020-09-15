@@ -381,7 +381,7 @@ public class BJYController {
             if (task.getTaskStatus() != TaskStatus.Error && task.getTaskStatus() != TaskStatus.Finish) {
                 if (pause) {
                     task.setDownloadListener(null);
-                    task.pause();
+                    pauseTask(task);
                     dict.put("state", 2);
                 } else {
                     bindListener(channel,result,userId,task);
@@ -425,7 +425,7 @@ public class BJYController {
         Map<String, Object> dict = new HashMap<>();
         if (pause) {
             task.setDownloadListener(null);
-            task.pause();
+            pauseTask(task);
             dict.put("code", 1);
             dict.put("msg", "暂停成功");
             try {
@@ -442,6 +442,20 @@ public class BJYController {
             } catch (Exception e) {
             }
         }
+    }
+
+    static void pauseTask(DownloadTask task) {
+        task.pause();
+        try {
+            Class<?> f = Class.forName("com.baijiayun.download.f");
+            Field uField = f.getDeclaredField("u");
+            uField.setAccessible(true);
+            uField.set(task, TaskStatus.Pause);
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+            Log.e(BJYLOG, "getMessage:" + ignored.getMessage());
+        }
+        task.pause();
     }
 
     static void queryDownloadQueue(MethodChannel.Result result, DownloadManager downloadManager, String userId) {
@@ -584,7 +598,7 @@ public class BJYController {
 //            }
 
             task.setDownloadListener(null);
-            task.pause();
+            pauseTask(task);
             task.deleteFiles();
 
             downloadManager.deleteTask(task);
