@@ -2,6 +2,7 @@ package com.xgs.flutter_live;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -26,6 +27,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
+import static com.xgs.flutter_live.BJYController.BJYLOG;
 import static com.xgs.flutter_live.BJYController.bindListener;
 import static com.xgs.flutter_live.BJYController.videoProgressListener;
 
@@ -117,12 +119,12 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
             downloadManagerCheck(currentActivity.get(),userId, result);
-            BJYController.pauseDownloadQueue(result,downloadManager,identifier,pause);
+            BJYController.pauseDownloadQueue(methodChannel,result,userId,downloadManager,identifier,pause);
         }else if ("pauseAllDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
             boolean pause = (boolean) call.argument("pause");
             downloadManagerCheck(currentActivity.get(),userId, result);
-            BJYController.pauseAllDownloadQueue(result,downloadManager,pause,userId);
+            BJYController.pauseAllDownloadQueue(methodChannel,result,downloadManager,pause,userId);
         }else if ("queryDownloadQueue".equals(call.method)) {
             String userId = call.argument("userId");
             downloadManagerCheck(currentActivity.get(),userId, result);
@@ -144,6 +146,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             downloadManager.setTargetFolder(pathStr);
             downloadManager.loadDownloadInfo(identifier,true);
             mIdentifier=identifier;
+            Log.e(BJYLOG,"downloadManagerCheck:");
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 bindListener(methodChannel, result,userId,task);
                 if(task.getTaskStatus()== TaskStatus.Pause){
@@ -159,6 +162,7 @@ public class FlutterLivePlugin implements FlutterPlugin, ActivityAware,MethodCal
             downloadManager.setTargetFolder(pathStr);
             downloadManager.loadDownloadInfo(identifier,true);
             mIdentifier=identifier;
+            Log.e(BJYLOG,"downloadManagerCheck:");
             for (DownloadTask task:downloadManager.getAllTasks()) {
                 bindListener(methodChannel, result,userId,task);
                 if(task.getTaskStatus()== TaskStatus.Pause){

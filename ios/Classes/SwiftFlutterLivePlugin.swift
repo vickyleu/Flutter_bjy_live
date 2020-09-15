@@ -465,6 +465,36 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
                 item!.resume()
             }
         } else {///不能下载,可能是正在下载中了,或者已经下载完成
+            let downloadItems = manager.downloadItems as [BJLDownloadItem]
+            var item: BJVDownloadItem?
+            
+            let identifier = "\(userId)_\(classID)_0"
+            for downloadItem in downloadItems{
+                print("\(downloadItem)这里的downloadItem是不是有毛病")
+                if(downloadItem.itemIdentifier == identifier){
+                    item = downloadItem as! BJVDownloadItem
+                    break
+                }
+            }
+            if(item != nil){
+                dict["code"] = 1
+                dict["msg"] = "开始下载"
+                dict["userId"] = userId
+                dict["size"] = item!.totalSize
+                dict["path"] = item!.downloadFiles?.first?.filePath
+                dict["state"] = 0
+                dict["speed"] = "0K"
+                dict["itemIdentifier"] = item!.itemIdentifier
+                dict["fileName"] = item!.downloadFiles?.first?.fileName ?? "未知"
+                item!.pause()
+                item!.resume()
+                do {
+                    try     result(dict)///下载结果
+                } catch  {
+                }
+                return
+            }
+            
             dict["code"] = 2
             dict["msg"] = "文件已下载或正在下载中"
         }

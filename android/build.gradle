@@ -93,10 +93,10 @@ configurations {
 dependencies {
 //    compileOnly "io.flutter:flutter_embedding_debug:+"
 
-    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.2.3'
-    implementation 'com.baijia.player:VideoplayerUI:2.1.1'
-    implementation 'com.baijiayun.live:group-class-ui:1.1.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.2.4'
+    implementation 'com.baijia.player:VideoplayerUI:2.1.4'
+    implementation 'com.baijiayun.live:group-class-ui:1.1.4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 }
 

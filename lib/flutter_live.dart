@@ -338,13 +338,8 @@ class FlutterLive {
           }
           _streamController.sink.add(model);
           print("streamController.add(${model.toString()})");
-        } else {
-          final model = parseModel(map);
-          if(model.state==1){//&&model.token!=null&&model.token.isNotEmpty
-            insertOrUpdateModel(model);
-            _streamController.sink.add(model);
-            print("streamController.addinsertOrUpdateModel(${model.toString()})");
-          }
+        }else {
+          removeDownloadQueue(userId, map["itemIdentifier"]);
         }
       } catch (e) {
         final error = e?.toString() ?? "";
