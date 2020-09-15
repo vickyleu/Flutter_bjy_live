@@ -598,6 +598,7 @@ public class BJYController {
 //            }
 
             task.setDownloadListener(null);
+            task.cancel();
             pauseTask(task);
             task.deleteFiles();
 
