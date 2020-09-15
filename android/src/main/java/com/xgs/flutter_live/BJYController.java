@@ -3,8 +3,6 @@ package com.xgs.flutter_live;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,15 +14,12 @@ import com.baijiayun.download.DownloadTask;
 import com.baijiayun.download.constant.TaskStatus;
 import com.baijiayun.groupclassui.InteractiveClassUI;
 import com.baijiayun.livecore.context.LPConstants;
-import com.baijiayun.playback.util.FileUtils;
 import com.baijiayun.videoplayer.ui.bean.VideoPlayerConfig;
 import com.baijiayun.videoplayer.ui.playback.PBRoomUI;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,13 +129,13 @@ public class BJYController {
         downloadManager.newPlaybackDownloadTask(userId, Long.parseLong(roomId), 0, token, "回放下载")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(downloadTask -> {
-                    Log.e(BJYLOG,"subscribe:"+Long.parseLong(roomId));
+                    Log.e(BJYLOG, "subscribe:" + Long.parseLong(roomId));
                     Log.e("result", "subscribe:" + downloadTask);
                     downloadTask = downloadManager.getTaskByRoom(Long.parseLong(roomId), 0);
                     bindListener(channel, result, userId, downloadTask);
                     downloadTask.restart();
                 }, throwable -> {
-                    Log.e(BJYLOG,"throwable:"+Long.parseLong(roomId));
+                    Log.e(BJYLOG, "throwable:" + Long.parseLong(roomId));
                     throwable.printStackTrace();
                     Log.e("result", "throwable:" + throwable);
                     Map<String, Object> dict1 = new HashMap<>();
@@ -316,7 +311,7 @@ public class BJYController {
 
             @Override
             public void onProgress(DownloadTask task) {
-                Log.e(BJYLOG,"onProgress:"+task.getVideoDownloadInfo().roomId);
+                Log.e(BJYLOG, "onProgress:" + task.getVideoDownloadInfo().roomId);
                 double progress = task.getDownloadedLength();
                 double size = task.getTotalLength();
                 Log.e("视频下载", "视频下载 onProgress===" + task.getVideoFileName() + "--->" + ((int) (progress * 100 / size)) + " %");
@@ -358,8 +353,8 @@ public class BJYController {
         }
     }
 
-    static void pauseAllDownloadQueue(MethodChannel channel,MethodChannel.Result result, DownloadManager downloadManager, boolean pause, String userId) {
-        Log.e(BJYLOG,"pauseAllDownloadQueue:");
+    static void pauseAllDownloadQueue(MethodChannel channel, MethodChannel.Result result, DownloadManager downloadManager, boolean pause, String userId) {
+        Log.e(BJYLOG, "pauseAllDownloadQueue:");
         List<DownloadTask> tasks = downloadManager.getAllTasks();
         List<Map<String, Object>> list = new ArrayList<>();
         for (DownloadTask task : tasks) {
@@ -384,7 +379,7 @@ public class BJYController {
                     pauseTask(task);
                     dict.put("state", 2);
                 } else {
-                    bindListener(channel,result,userId,task);
+                    bindListener(channel, result, userId, task);
                     task.start();
                     dict.put("state", 0);
                 }
@@ -416,7 +411,7 @@ public class BJYController {
         }
     }
 
-    static void pauseDownloadQueue(MethodChannel channel,MethodChannel.Result result,String userId, DownloadManager downloadManager, String roomId, boolean pause) {
+    static void pauseDownloadQueue(MethodChannel channel, MethodChannel.Result result, String userId, DownloadManager downloadManager, String roomId, boolean pause) {
         Log.e(BJYLOG, "pauseAllDownloadQueue:" + Long.parseLong(roomId));
         DownloadTask task = downloadManager.getTaskByRoom(
                 Long.parseLong(roomId),//roomId
@@ -433,7 +428,7 @@ public class BJYController {
             } catch (Exception e) {
             }
         } else {
-            bindListener(channel,result,userId,task);
+            bindListener(channel, result, userId, task);
             task.start();
             dict.put("code", 1);
             dict.put("msg", "恢复成功");
@@ -445,12 +440,29 @@ public class BJYController {
     }
 
     static void pauseTask(DownloadTask task) {
+
+
         task.pause();
         try {
-            Class<?> f = Class.forName("com.baijiayun.download.f");
-            Field uField = f.getDeclaredField("u");
-            uField.setAccessible(true);
-            uField.set(task, TaskStatus.Pause);
+            Log.e("getCanonicalName",""+task.getClass().getCanonicalName());
+            Class<?> f = Class.forName("a.a.a.f");
+            Field bField = f.getDeclaredField("b");
+            bField.setAccessible(true);
+            DownloadModel b = (DownloadModel) bField.get(task);
+            DownloadModel var1=null;
+            while (var1!=null?(var1=b)!=null:(var1=var1.nextModel)!=null) {
+                var1.status=TaskStatus.Pause;
+            }
+
+            Field gField = f.getDeclaredField("g");
+            gField.setAccessible(true);
+            gField.set(task, TaskStatus.Pause);
+            Field cField = f.getDeclaredField("c");
+            cField.setAccessible(true);
+            Object c=cField.get(task);
+            Field ccField= c.getClass().getField("c");
+            ccField.setAccessible(true);
+            ccField.set(c, true);
         } catch (Exception ignored) {
             ignored.printStackTrace();
             Log.e(BJYLOG, "getMessage:" + ignored.getMessage());
@@ -597,13 +609,10 @@ public class BJYController {
 //                Log.e(BJYLOG, "getMessage:" + ignored.getMessage());
 //            }
 
+            downloadManager.deleteTask(task);
             task.setDownloadListener(null);
             task.cancel();
             pauseTask(task);
-            task.deleteFiles();
-
-            downloadManager.deleteTask(task);
-
             Log.e(BJYLOG, "deleteTask:" + roomId);
             dict_.put("code", 1);
             dict_.put("msg", "删除成功");
