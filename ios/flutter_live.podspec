@@ -17,12 +17,12 @@ Pod::Spec.new do |s|
 
   s.resources = 'Classes/resource.bundle'
   s.dependency 'Flutter'
-  s.dependency 'BJVideoPlayerCore',  '= 2.9.0'
-  s.dependency 'BJVideoPlayerUI',  '= 2.9.0'
-  s.dependency 'BJPlaybackUI',  '= 2.9.0'
+  s.dependency 'BJVideoPlayerCore',  '= 2.10.0'
+  s.dependency 'BJVideoPlayerUI',  '= 2.10.0'
+  s.dependency 'BJPlaybackUI',  '= 2.10.0'
 
-  s.dependency 'BJLiveCore', '= 2.9.5-txpro'
-  s.dependency 'BJLiveUI',  '= 2.9.0'
+  s.dependency 'BJLiveCore', '= 2.10.1'
+  s.dependency 'BJLiveUI',  '= 2.10.0'
 
   ## s.libraries = ['icucore', 'c++', 'z', 'resolv', 'bz2']
   ## s.static_framework = false
