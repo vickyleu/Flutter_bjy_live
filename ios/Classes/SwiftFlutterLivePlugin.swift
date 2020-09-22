@@ -388,8 +388,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         let identifier = "download_Identifier_\(userId)"
         if downloadManager == nil {
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+            let manager = downloadManager!
             handler=DownloadHandler.init(userId: userId)
-            downloadManager!.delegate = self
+            manager.delegate = self
             let currentDownloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral:  BJLDownloadItemState.paused.rawValue),NSNumber.init(integerLiteral: BJLDownloadItemState.invalid.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
             if(currentDownloadItems != nil){
                 for element in currentDownloadItems! {
@@ -398,7 +399,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             }
             
         } else if downloadManager!.identifier != identifier {
-            let manager = downloadManager!
+            var manager = downloadManager!
             print("downloadManager!.identifier:\(downloadManager!.identifier)  identifier:\(identifier)")
             let downloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral: BJLDownloadItemState.running.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
             if(downloadItems != nil){
@@ -407,6 +408,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
                 }
             }
             downloadManager = BJVDownloadManager.init(identifier: identifier, inCaches: true);
+            manager = downloadManager!
             handler=DownloadHandler.init(userId: userId)
             downloadManager!.delegate = self
             let currentDownloadItems = manager.downloadItems(withStatesArray: [NSNumber.init(integerLiteral:  BJLDownloadItemState.paused.rawValue),NSNumber.init(integerLiteral: BJLDownloadItemState.invalid.rawValue),NSNumber.init(integerLiteral: NSNotFound)]) as? [BJLDownloadItem]
