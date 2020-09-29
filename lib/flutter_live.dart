@@ -399,7 +399,7 @@ class FlutterLive {
   }
 
   Future<void> _createDatabase() async {
-    Sqflite.devSetDebugModeOn(true);
+    // Sqflite.devSetDebugModeOn(true);
     // Sqflite.setDebugModeOn(const bool.fromEnvironment("dart.vm.product"));
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
