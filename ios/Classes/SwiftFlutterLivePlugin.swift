@@ -46,7 +46,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let avatar = dic["userAvatar"] as! String
             let sign = dic["sign"] as! String
             let roomId = dic["roomId"] as! String
-            let interactive = dic["interactive"] as! bool
+            let interactive = dic["interactive"] as! Bool
 
             startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId,interactive:interactive)
             do {
@@ -132,7 +132,7 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
     }
     
     
-    public func startLive(name: String, num: String, avatar: String, sign: String, roomId: String ,interactive: bool) {
+    public func startLive(name: String, num: String, avatar: String, sign: String, roomId: String ,interactive: Bool) {
         let bjuser = BJLUser.init(number: num, name: name, groupID: 0, avatar: avatar, role: BJLUserRole.student)
         
         if interactive {
