@@ -18,7 +18,8 @@ class BJYLiveOption {
     private String userNum;
     private String sign;
     private String roomId;
-
+    ///大班课
+    private boolean interactive;
 
     BJYLiveOption create(@Nonnull MethodCall call) {
         this.userName = call.argument("userName");
@@ -26,6 +27,7 @@ class BJYLiveOption {
         this.avatarUrl = call.argument("userAvatar");
         this.sign = call.argument("sign");
         this.roomId = call.argument("roomId");
+        this.interactive = call.argument("interactive");
         return this;
     }
 
@@ -43,6 +45,10 @@ class BJYLiveOption {
 
     String getSign() {
         return sign == null ? "" : sign;
+    }
+
+    public boolean isInteractive() {
+        return interactive;
     }
 
     Long getRoomId() {

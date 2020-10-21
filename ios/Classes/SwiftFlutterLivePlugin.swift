@@ -46,8 +46,9 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
             let avatar = dic["userAvatar"] as! String
             let sign = dic["sign"] as! String
             let roomId = dic["roomId"] as! String
-            
-            startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId)
+            let interactive = dic["interactive"] as! bool
+
+            startLive(name: name, num: num, avatar: avatar, sign: sign, roomId: roomId,interactive:interactive)
             do {
                 try  result(true)
             } catch  {
@@ -131,19 +132,19 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
     }
     
     
-    public func startLive(name: String, num: String, avatar: String, sign: String, roomId: String) {
-        
-        
+    public func startLive(name: String, num: String, avatar: String, sign: String, roomId: String ,interactive: bool) {
         let bjuser = BJLUser.init(number: num, name: name, groupID: 0, avatar: avatar, role: BJLUserRole.student)
         
-        
-        let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
-        
-        
-        let vc = UIApplication.shared.keyWindow?.rootViewController
-        
-        
-        vc?.present(bjlrc, animated: true, completion: nil)
+        if interactive {
+             let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
+             let vc = UIApplication.shared.keyWindow?.rootViewController
+             vc?.present(bjlrc, animated: true, completion: nil)
+        }else{
+            let bjlrc = BJLRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLRoomViewController
+            let vc = UIApplication.shared.keyWindow?.rootViewController
+            vc?.present(bjlrc, animated: true, completion: nil)
+        }
+
     }
     
     

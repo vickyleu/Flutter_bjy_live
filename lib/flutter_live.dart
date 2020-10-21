@@ -72,13 +72,14 @@ class FlutterLive {
 
   // 跳转直播
   void startLiveActivity(String userName, String userNum, String userAvatar,
-      String sign, String roomId) {
+      String sign, String roomId,bool interactive) {
     _channel.invokeMethod("startLive", {
       'userName': userName,
       'userNum': userNum,
       'userAvatar': userAvatar,
       'sign': sign,
       'roomId': roomId,
+      'interactive': interactive,
     });
   }
 
