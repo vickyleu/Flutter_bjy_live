@@ -44,22 +44,18 @@ public class BJYController {
 
     // 跳转直播
     static void startLiveActivity(final Activity activity, BJYLiveOption option) {
-        if(option.isInteractive()){
+        if(option.isInteractive()){///专业小班课
             // 编辑用户信息
             InteractiveClassUI.LiveRoomUserModel userModel = new InteractiveClassUI.LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student);
             // 进入直播房间
             InteractiveClassUI.enterRoom(activity, option.getRoomId(), option.getSign(), userModel, s -> Toast.makeText(activity, s, Toast.LENGTH_SHORT).show());
 
-        }else{
-
+        }else{ ////大班课
             LiveSDKWithUI.LiveRoomUserModel userModel = new LiveSDKWithUI.LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student);
             LiveSDKWithUI.enterRoom(activity, option.getRoomId(), option.getSign(), userModel, s -> Toast.makeText(activity, s, Toast.LENGTH_SHORT).show());
-
             //退出直播间二次确认回调 无二次确认无需设置
             LiveSDKWithUI.setRoomExitListener((context, callback) -> callback.exit());
-
             //设置直播单点登录
-
             LiveSDKWithUI.setEnterRoomConflictListener((context, type, callback) -> {
                 if (context != null) {
                     // 单点登录冲突 endType为冲突方终端类型
