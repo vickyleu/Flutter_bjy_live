@@ -136,11 +136,11 @@ public class SwiftFlutterLivePlugin: NSObject, FlutterPlugin,BJVRequestTokenDele
         let bjuser = BJLUser.init(number: num, name: name, groupID: 0, avatar: avatar, role: BJLUserRole.student)
         
         if interactive {
-             let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController
+             let bjlrc = BJLScRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLScRoomViewController  ///大班课UI
              let vc = UIApplication.shared.keyWindow?.rootViewController
              vc?.present(bjlrc, animated: true, completion: nil)
         }else{
-            let bjlrc = BJLRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLRoomViewController
+            let bjlrc = BJLIcRoomViewController.instance(withID: roomId, apiSign: sign, user: bjuser) as! BJLIcRoomViewController
             let vc = UIApplication.shared.keyWindow?.rootViewController
             vc?.present(bjlrc, animated: true, completion: nil)
         }
