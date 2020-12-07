@@ -30,6 +30,8 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
+        maven { url "http://download.flutter.io"}
     }
 }
 
@@ -76,9 +78,9 @@ configurations {
 dependencies {
 //    compileOnly "io.flutter:flutter_embedding_debug:+"
 
-    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.3.1'
-    implementation 'com.baijia.player:VideoplayerUI:2.1.7'
-    implementation 'com.baijiayun.live:group-class-ui:1.2.1'
+    implementation 'com.baijiayun.live:liveplayer-sdk-ui:+'
+    implementation 'com.baijia.player:VideoplayerUI:+'
+    implementation 'com.baijiayun.live:group-class-ui:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 }
