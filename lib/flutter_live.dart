@@ -315,7 +315,6 @@ class FlutterLive {
       keys.forEach((element) {
         second[element as String] = map[element as String];
       });
-      print("notifyChange===map:::${second.toString()}");
       String userId = map["userId"];
       try {
         if (userId == null) return;
