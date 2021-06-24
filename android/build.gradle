@@ -18,6 +18,7 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
     }
 }
 

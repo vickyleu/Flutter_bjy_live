@@ -2,11 +2,12 @@ package com.xgs.flutter_live;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.baijiahulian.common.networkv2.HttpException;
@@ -18,6 +19,8 @@ import com.baijiayun.download.constant.TaskStatus;
 import com.baijiayun.groupclassui.InteractiveClassUI;
 import com.baijiayun.live.ui.LiveSDKWithUI;
 import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.LPSignEnterRoomModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 import com.baijiayun.videoplayer.ui.bean.VideoPlayerConfig;
 import com.baijiayun.videoplayer.ui.playback.PBRoomUI;
 
@@ -45,14 +48,13 @@ public class BJYController {
     // 跳转直播
     static void startLiveActivity(final Activity activity, BJYLiveOption option) {
         if(option.isInteractive()){///专业小班课
-            // 编辑用户信息
-            InteractiveClassUI.LiveRoomUserModel userModel = new InteractiveClassUI.LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student);
-            // 进入直播房间
-            InteractiveClassUI.enterRoom(activity, option.getRoomId(), option.getSign(), userModel, s -> Toast.makeText(activity, s, Toast.LENGTH_SHORT).show());
-
+            InteractiveClassUI.enterRoom(activity,new LPSignEnterRoomModel(option.getRoomId(),
+                    new LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student),
+                    option.getSign()));
         }else{ ////大班课
-            LiveSDKWithUI.LiveRoomUserModel userModel = new LiveSDKWithUI.LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student);
-            LiveSDKWithUI.enterRoom(activity, option.getRoomId(), option.getSign(), userModel, s -> Toast.makeText(activity, s, Toast.LENGTH_SHORT).show());
+            LiveSDKWithUI.enterRoom(activity, new LPSignEnterRoomModel(option.getRoomId(),
+                    new LiveRoomUserModel(option.getUserName(), option.getAvatarUrl(), option.getUserNum(), LPConstants.LPUserType.Student),
+                    option.getSign()));
             //退出直播间二次确认回调 无二次确认无需设置
             LiveSDKWithUI.setRoomExitListener((context, callback) -> callback.exit());
             //设置直播单点登录
@@ -624,4 +626,76 @@ public class BJYController {
     }
 
 
+}
+
+class LiveRoomUserModel implements IUserModel {
+
+    String userName;
+    String userAvatar;
+    String userNumber;
+    LPConstants.LPUserType userType;
+
+    public LiveRoomUserModel(@NonNull String userName, @Nullable String userAvatar, @Nullable String userNumber, @NonNull LPConstants.LPUserType userType) {
+        this.userName = userName;
+        this.userAvatar = userAvatar;
+        this.userNumber = userNumber;
+        this.userType = userType;
+    }
+
+    @Override
+    public String getUserId() {
+        return null;
+    }
+
+    @Override
+    public String getNumber() {
+        return userNumber;
+    }
+
+    @Override
+    public String getReplaceNumber() {
+        return null;
+    }
+
+    @Override
+    public String getUserNumberReplaceMe() {
+        return null;
+    }
+
+    @Override
+    public boolean canReplaceOtherUser(IUserModel iUserModel) {
+        return false;
+    }
+
+
+
+    @Override
+    public LPConstants.LPUserType getType() {
+        return userType;
+    }
+
+    @Override
+    public String getName() {
+        return userName;
+    }
+
+    @Override
+    public String getAvatar() {
+        return userAvatar;
+    }
+
+    @Override
+    public int getGroup() {
+        return 0;
+    }
+
+    @Override
+    public LPConstants.LPEndType getEndType() {
+        return LPConstants.LPEndType.Android;
+    }
+
+    //        @Override
+    public Map<String, Object> getWebRTCInfo() {
+        return new HashMap<>();
+    }
 }
