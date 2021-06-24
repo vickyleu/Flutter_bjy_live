@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="240dp"
         android:background="#88000000"
-        app:aspect_ratio="fit_parent_16_9"
-        app:render_type="texture_view" />
+        app:bjy_aspect_ratio="fit_parent_16_9"
+        app:bjy_render_type="texture_view" />
 
 </LinearLayout>

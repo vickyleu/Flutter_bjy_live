@@ -64,11 +64,11 @@ public class CustomBJYVideoView extends BaseVideoView {
     public CustomBJYVideoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, com.baijiayun.videoplayer.ui.R.styleable.BJVideoView, 0, 0);
-        if (a.hasValue(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_aspect_ratio)) {
-            mAspectRatio = a.getInt(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_aspect_ratio, AspectRatio.AspectRatio_16_9.ordinal());
+        if (a.hasValue(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_bjy_aspect_ratio)) {
+            mAspectRatio = a.getInt(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_bjy_aspect_ratio, AspectRatio.AspectRatio_16_9.ordinal());
         }
-        if (a.hasValue(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_render_type)) {
-            mRenderType = a.getInt(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_render_type, IRender.RENDER_TYPE_SURFACE_VIEW);
+        if (a.hasValue(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_bjy_render_type)) {
+            mRenderType = a.getInt(com.baijiayun.videoplayer.ui.R.styleable.BJVideoView_bjy_render_type, IRender.RENDER_TYPE_SURFACE_VIEW);
         }
         a.recycle();
     }
