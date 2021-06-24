@@ -4,8 +4,25 @@ buildscript {
     ext.kotlin_version = '1.5.10'
     ext.anko_version = '0.10.8'
     repositories {
-        google()
-        maven { url "http://download.flutter.io"}
+        all { ArtifactRepository repo ->
+            if(repo instanceof MavenArtifactRepository){
+                def url = repo.url.toString()
+                if (
+                (url.startsWith('https://dl.google.com/')||url.startsWith('http://dl.google.com/'))||
+                        (url.startsWith('https://repo1.maven.org/')||url.startsWith('http://repo1.maven.org/'))||
+                        (url.startsWith('https://jcenter.bintray.com/')||url.startsWith('http://jcenter.bintray.com/'))||
+                        (url.startsWith('https://plugins.gradle.org/')||url.startsWith('http://plugins.gradle.org/'))||
+                        (url.startsWith('https://download.flutter.io/')||url.startsWith('http://download.flutter.io/'))
+                ) {
+                    remove repo
+                }
+            }
+        }
+        maven { url 'http://www.mvnrepository.com' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
     }
 
     dependencies {
@@ -16,9 +33,26 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
-        google()
+        all { ArtifactRepository repo ->
+            if(repo instanceof MavenArtifactRepository){
+                def url = repo.url.toString()
+                if (
+                (url.startsWith('https://dl.google.com/')||url.startsWith('http://dl.google.com/'))||
+                        (url.startsWith('https://repo1.maven.org/')||url.startsWith('http://repo1.maven.org/'))||
+                        (url.startsWith('https://jcenter.bintray.com/')||url.startsWith('http://jcenter.bintray.com/'))||
+                        (url.startsWith('https://plugins.gradle.org/')||url.startsWith('http://plugins.gradle.org/'))||
+                        (url.startsWith('https://download.flutter.io/')||url.startsWith('http://download.flutter.io/'))
+                ) {
+                    remove repo
+                }
+            }
+        }
+        maven { url 'http://www.mvnrepository.com' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
-        maven { url "http://download.flutter.io"}
     }
 }
 
