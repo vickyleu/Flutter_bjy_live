@@ -1,7 +1,7 @@
 group 'com.xgs.flutter_live'
 version '1.0-SNAPSHOT'
 buildscript {
-    ext.kotlin_version = '1.5.10'
+    ext.kotlin_version = '1.5.20'
     ext.anko_version = '0.10.8'
     repositories {
         google()
@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -60,9 +60,9 @@ configurations {
 }
 
 dependencies {
-    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.6.9'
+    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.6.10'
     implementation 'com.baijia.player:VideoplayerUI:2.6.10'
-    implementation 'com.baijiayun.live:group-class-ui:2.6.9'
+    implementation 'com.baijiayun.live:group-class-ui:2.6.10'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 }

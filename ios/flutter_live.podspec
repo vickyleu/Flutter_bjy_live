@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.resources = 'Classes/resource.bundle'
   s.dependency 'Flutter'
-  s.dependency 'BJVideoPlayerUI',  '2.10.1'
+  s.dependency 'BJVideoPlayerUI',  '2.10.2'
   s.dependency 'BJPlaybackUI',  '2.10.2'
   s.dependency 'BJLiveUI',  '2.10.2'
   s.static_framework = true
