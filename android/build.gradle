@@ -60,8 +60,8 @@ configurations {
 }
 
 dependencies {
-    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.6.10'
-    implementation 'com.baijiayun.live:group-class-ui:2.6.10'
+    implementation 'com.baijiayun.live:liveplayer-sdk-ui:2.6.9'
+    implementation 'com.baijiayun.live:group-class-ui:2.6.9'
 
     implementation 'com.baijia.player:VideoplayerUI:2.6.10'
     implementation 'com.baijia.player:VideoplayerCore:2.6.11'
