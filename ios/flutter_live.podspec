@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
 
   s.resources = 'Classes/resource.bundle'
   s.dependency 'Flutter'
-  s.dependency 'BaijiaYun/BJVideoPlayerUI', '2.11.11'
-  s.dependency 'BaijiaYun/BJPlaybackUI', '2.11.11'
-  s.dependency 'BaijiaYun/BJLiveUI', '~> 2.11.11'
+  s.dependency 'BaijiaYun/BJVideoPlayerUI', '2.11.12-tencent-professional'
+  s.dependency 'BaijiaYun/BJPlaybackUI', '2.11.12-tencent-professional'
+  s.dependency 'BaijiaYun/BJLiveUI', '2.11.12-tencent-professional'
 
   s.static_framework = true
   s.ios.deployment_target = '9.0'
